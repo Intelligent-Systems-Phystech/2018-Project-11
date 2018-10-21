@@ -1,0 +1,68 @@
+\documentclass[12pt,twoside]{article}
+
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{footnote}
+\usepackage{jmlda}
+
+\begin{document}
+\title
+    {Автоматическое построение нейросети оптимальной сложности}
+\author
+    {Улитин А.Ю. , Бахтеев О.Ю , Стрижов В.В.} % основной список авторов, выводимый в оглавление
+\email
+    {ulitin.ayu@phystech.edu}
+
+\organization
+    {Московский физико-технический институт}
+\abstract
+	{Работа посвящена поиску  оптимальной модели нейросети. Нейросеть представляется как граф, где ребрам соответствуют нелинейные операции, а вершины - промежуточные представления. Параметры сети разделим на три типа: Параметры, отвечающие за итоговое качество классификации,гиперпараметры, отвечающие за процесс переобучения и предотвращение переобучения, а также структурные параметры, которые отвечают за структуру  модели. Структура нейросети опеределяется вершинами симплекса. Будем проводить релаксацию структуры для решения задачи оптимизации. 
+
+
+\bigskip
+\textbf{Ключевые слова}: \emph {нейросети, оптимизация гиперпараметров,робастность модели}.
+
+}
+
+\maketitle
+
+\section{Введение}
+В данной работе рассматривается метод построения оптимальной нейронной сети. Под оптимальной сетью понимается ее максимальная простая структура. Под структурой понимается набор гиперпараметров: количество слоев, нейронов в каждом слое, а также функции активации в каждом нейроне. Рассмотрим наиболее распространенный композиции нейронов — многослойный персептрон.Нейроны располагаются слоями, при этом каждый нейрон из следующего слоя связан со всеми нейронами предыдущего. А построив задачу на простой компазиции нейронов, мы будем переходить к другим видам.
+
+\par Существует несколько способов построения оптимальной нейронной сети. Один из основных - оптимальное прореживание~\cite{BrainDamage}. Он заключается в том, что из максимально сложной модели мы убираем связи и получаем упрощенную сеть. В работае~\cite{BayesOptim}  предложен байссовский метод оптимизации сети ,а в работе  ~\cite{GradientOptim} рассмотрен метод градиентного спуска.
+\par Ввиду того, что у моделей огромное количество параметров и гиперпараметров, процесс оптимизации может быть затратным. В данной работе используется эффективный по ресурсам метод, в основе которого лежит алгоритм DARTS ~\cite{DARTS}, где на вход мы получаем некоторый набор входных данных, а также функции активации. Оптимизируя параметры и гиперпараметры паралельно, мы на выходе получим оптимальную нейронную сеть.
+\par Проверка и анализ метода проводится на выборках ~\cite{Boston},~\cite{MNIST} и синтетических данных. В эксперементе проводится сравнение полученного результата с моделями, полученными другими базовыми алгоритмами.
+\begin{thebibliography}{99}
+
+\bibitem{BrainDamage}
+\BibAuthor{Yann Le Cun, John S. Denker and Sara A. Solla.}
+\BibTitle{Optimal Brain Damage}. 1989.
+
+\bibitem{BayesOptim}
+\BibAuthor{A. Neal and M. Radfor}
+\BibTitle{Bayesian Learning for Neural Networks.}. 1995.
+
+\bibitem{GradientOptim}
+\BibAuthor{J. Luketina, M. Berglund, T. Raiko, and K. Gref}
+\BibTitle{Scalable gradient-based tuning of continuous
+regularization hyperparameters.} 2016.
+
+\bibitem{DARTS}
+\BibAuthor{Hanxiao~L., Simonyan~K., Yang~.Y}
+\BibTitle{DARTS: Differentiable Architecture Search}. 2018.
+URL: \BibUrl{https://arxiv.org/abs/1806.09055}.
+
+\bibitem{Boston}
+\BibAuthor{Harrison~Jr. , Rubinfeld~D., Daniel~L.}
+\BibTitle{Hedonic housing prices and the demand for clean air.} 1978.
+URL:{https://archive.ics.uci.edu/ml/machine-learning-datab..}.
+
+\bibitem{MNIST}
+\BibAuthor{Yann LeCun, Corinna Cortes, Christopher J.C. Burges, }
+\BibTitle{The MNIST Database of Handwritten Digits} 1998.
+URL:{http://yann.lecun.com/exdb/mnist/}
+
+\end{thebibliography}
+
+\end{document}
