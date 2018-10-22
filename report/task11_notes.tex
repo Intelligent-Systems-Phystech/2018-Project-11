@@ -1,0 +1,37 @@
+\documentclass[12pt,a4paper]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage{misccorr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\begin{document}
+\section{Общая схема постановки задачи}
+\textbf{Важно: } рассматриваем только задачу классификации для простоты.
+\begin{enumerate}
+\item Как описывается модель : https://github.com/bahleg/tex\_slides/blob/master/ioi18/slides.pdf (слайд 7).
+\item Общая идея параметризации берется из DARTS.
+\item Гиперпараметры --- $l_2$-регулязирация.
+\item Задачу ставим как двухуровневую задачу оптимизации (параметры оптимизируем по обучающей выборке, структуру и гиперпараметры --- по валидационной). Приблизительно списать можно, например, отсюда\\: https://arxiv.org/pdf/1602.02355.pdf (формула 1 на странице 3).
+\end{enumerate}
+
+\section{Общие обозначения}
+\begin{itemize}
+\item Обучающая выборка: $\mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}}$.
+\item Валидационная выборка: $\mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}}$.    
+\item Объекты: $[\mathbf{x}_1, \dots, \mathbf{x}_m] = \mathbf{X}, \quad \mathbf{x} \in \mathbb{R}^n.$
+\item Метки объектов: $[y_1, \dots, y_m] \in \mathbf{y}, \quad y \in \{1, \dots Z\}.$
+\item Количество классов: $Z$.
+\item Модель: $\mathbf{f}(\mathbf{x}, \mathbf{W}).$
+\item Подмодель: $\mathbf{f}_v (\mathbf{x}, \mathbf{w}_v)$.
+\item Параметры модели: $\mathbf{W}$.
+\item Ребра графа: $E$.
+\item Вершины графа: $V$.
+\item Базовые функции для ребра (i,j): $\mathbf{g}^{i,j}, \quad |\mathbf{g}^{i,j}| = K^{i,j}.$
+\item Веса каждой базовой функции: $\boldsymbol{\gamma}^{i,j}$.
+\item Структура модели: $\boldsymbol{\Gamma}$.
+\item Регуляризационное слагаемое: $\mathbf{A}$.
+\item Функция потерь на обучении: $L$
+\item Функция потерь на валидации: $Q$.
+\end{itemize}
+\end{document}
