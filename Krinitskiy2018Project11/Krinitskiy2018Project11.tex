@@ -1,0 +1,89 @@
+\documentclass[12pt, twoside]{article}
+\usepackage{jmlda}
+
+
+\title
+    {Автоматическое построение нейросети оптимальной сложности }
+
+\author
+    {Криницкий~К.\,Д. , Бахтеев~О.\,Ю. , Стрижов~В.\,В.} 
+\email
+    {krinitskiy.kd@phystech.edu;  bakhteev@phystech.edu;  strijov@phystech.edu}
+
+
+\abstract{\textbf{Аннотация}:
+В этой статье рассматривается задача поиска оптимальной структуры нейронной сети. Нейросеть рассматривается как вычислительный граф, реализуемый с помощью библиотеки Pytorch. Предусматривается, что число структурных параметров можно уменьшить без существенной потери качества классификации или регрессии. Будут изучены изменения характеристик нейронной сети при колебании структурных параметров. Итоговым результатом будет являться модель , дающая приемлемое качество классификации либо регрессии, и не являющаяся избыточной по параметрам.
+
+\bigskip
+
+\
+
+\textbf{Ключевые слова}:  \emph{нейронные сети, графовые вычисления, оптимизация гиперпараметров, вариационный вывод}
+
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Введение}
+  В данной работе решается задача построения нейронной сети оптимальной сложности. Под оптимальной моделью имеется ввиду та модель, которая является не избыточной по своим параметрам, но при этом дающая приемлемый результат классификации либо регрессии. В данной статье рассматривается оптимизация структурных параметров, таких как: размерность слоев и их количество, функция активации.
+  \par Существует ряд способов выбора модели оптимальной сложности. В работе \cite{GaussianModel} рассматривается модель гауссовского процесса, поясняется как нужно оптимизировать структуру, в случае недостатка информации о входных данных. В \cite{BayesianModel} применяется баейсовская модель, а такаже говорится о принципе $"$Бритва Оккама$"$, который гласит, что из моделей одинаковой точности выбирается наиболее простая. В работах \cite{Gradient1}, \cite{Gradient2}, \cite{Gradient3}, \cite{Gradient4} рассматривается градиентный метод, также являющийся одним из способов оптимизации. 
+  \par Построение оптимальной нейронной сети - задача ресурсоемкая и вычислительно трудная. Из-за большого количества структурных параметров время обучение сети сильно возрастает. В данной работе используется эффективный алгоритм, основанный на методе DARTS \cite{DARTS}. Выбор оптимальных значений структурных параметров происходит благодаря процедуре релаксации: переход от дискретного набора параметров к непрерывному.
+  \par Проверка полученного алгоритма произведена на данных MNIST \cite{MNIST}, CIFAR-10 \cite{CIFAR}, Boston Housing \cite{Boston} также на синтетических данных. Модели, полученные представленным алгоритмом сравниваются с моделями, построенными с использованием базовых алгоритмах.
+
+
+\begin{thebibliography}{99}
+    \bibitem{GaussianModel}
+	\BibAuthor{Carl E.}
+	\BibTitle{Gaussian Processes in Machine Learning}. 2005.
+	
+	\bibitem{BayesianModel}
+	\BibAuthor{David J.C. MacKay}
+	\BibTitle{Information Theory, Inference, and Learning Algorithms}. 2005.
+	
+	\bibitem{Gradient1}
+	\BibAuthor{J. Luketina, M. Berglund, T. Raiko, and K. Gref}
+	\BibTitle{Scalable gradient-based tuning of continuous
+		regularization hyperparameters}. 2016.
+		
+	\bibitem{Gradient2}
+	\BibAuthor{D. Maclaurin, D. Duvenaud, R. P. Adams}
+	\BibTitle{Gradient-based Hyperparameter Optimization through Reversible Learning}. 2015.
+		
+	\bibitem{Gradient3}
+	\BibAuthor{L. Franceschi, M. Donini, P. Frasconi, M. Ponti }
+	\BibTitle{Forward and Reverse Gradient-Based Hyperparameter Optimization}. 2017.
+		
+	\bibitem{Gradient4}
+	\BibAuthor{Anonymous authors}
+	\BibTitle{Online hyper-parameter optimization}. 2018.
+		
+	\bibitem{DARTS}
+	\BibAuthor{Hanxiao~L., Simonyan~K., Yang~.Y}
+	\BibTitle{DARTS: Differentiable Architecture Search}. 2018.
+	URL: \BibUrl{https://arxiv.org/abs/1806.09055}.
+	
+	\bibitem{MNIST}
+	\BibAuthor{Yann LeCun, Corinna Cortes, Christopher J.C. Burges, }
+	\BibTitle{The MNIST Database of Handwritten Digits} 1998.
+	URL:{http://yann.lecun.com/exdb/mnist/}
+	
+	\bibitem{CIFAR}
+	\BibAuthor{A. Krizhevsky, V. Nair, G. Hilton. }
+	\BibTitle{The CIFAR-10 dataset} 2009.
+	URL: \BibUrl{http://www.cs.toronto.edu/~kriz/cifar.html}
+	
+	\bibitem{Boston}
+	\BibAuthor{Harrison~Jr. , Rubinfeld~D., Daniel~L.}
+	\BibTitle{Hedonic housing prices and the demand for clean air.} 1978.
+	URL:{https://archive.ics.uci.edu/ml/machine-learning-databases/housing/}.
+	
+
+\end{thebibliography}
+
+
+\end{document}
+
+
+
