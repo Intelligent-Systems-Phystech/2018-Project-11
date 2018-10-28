@@ -29,7 +29,7 @@
 
 
 \section{Введение}
-Выбор оптимальной модели в машинном обучении является одной из ключевых задач.
+При решении задачи классификации или регрессии в машинном обучении выбранная модель зачастую оказывается неоптимальной.
 Под оптимальной моделью понимается структура обучаемой сети и совокупность её гиперпараметров, которая даёт приемлемое качество классификации или регрессии при небольшом количестве параметров. В данной работе в качестве критерия выбора модели предлагается сложность модели, то есть величина, учитывающая сложность описания совокупности выборки и модели. Под описанием выборки понимается приближенная оценка сложности модели, основанная на связи с её правдоподобием\cite{DescriptionLength}
 
 Существует несколько подходов выбора модели оптимальной сложности. В работе \cite{BrainDamage} используется метод прореживания модели. Он заключается в построении заведомо переусложнённой модели с дальнейшим удалением параметров, не влияющих на качество классификации, таким образом получается сеть наименьшего размера. Ещё одиним способом, предложенным в работе \cite{BayesOptim}, являются байесовские методы оптимизации параметров нейронных сетей. В работе\cite{GradientOptim} для оптимизации модели предлагается использовать метод градиентного спуска. 
@@ -39,44 +39,56 @@
 В данной работе построение модели оптимальной сложности происходит в процессе самого обучения. В основе разработанного метода лежит алгоритм DARTS, предложенный в работе\cite{DARTS}. Для выбора оптимального набора гиперпараметров предлагается  параметризовать структуру
 модели некотором действительным вектором, путём перехода от дискретного множества возможных значений гиперпараметров к непрерывному множетсву их комбинаций.
 
-Проверка и анализ метода проводится на выборке Boston Housing\cite{Boston}, MNIST\cite{MNIST} и синтетических данных. Проводится сравнеине представленного метода с эвристическими алгоритмами выбора модели.
+Проверка и анализ метода проводится на выборке Boston Housing\cite{Boston}, MNIST\cite{MNIST} и  CIFAR-10\cite{CIFAR-10} и синтетических данных. Проводится сравнеине представленного метода с эвристическими алгоритмами выбора модели,  а также с алгоритмом DARTS.
 
+\section{Постановка задачи}
 
- 
+Пусть заданы обучающая и вылидационная выборки:
+\[
+\mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
+\]
+\[
+\mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}},
+\]
 
-\begin{thebibliography}{99}
-	\bibitem{DescriptionLength}
-	\BibAuthor{Grunwald~P.}
-	\BibTitle{A Tutorial Introduction to the Minimum Description Length Principle}. 2005.
-	
-	\bibitem{BrainDamage}
-	\BibAuthor{Yann Le Cun, John S. Denker and Sara A. Solla.}
-	\BibTitle{Optimal Brain Damage}. 1989.
-		
-	\bibitem{BayesOptim}
-	\BibAuthor{A. Neal and M. Radfor}
-	\BibTitle{Bayesian Learning for Neural Networks.}. 1995.
-	
-	\bibitem{GradientOptim}
-	\BibAuthor{J. Luketina, M. Berglund, T. Raiko, and K. Gref}
-	\BibTitle{Scalable gradient-based tuning of continuous
-		regularization hyperparameters.} 2016.
-	
-	\bibitem{DARTS}
-	\BibAuthor{Hanxiao~L., Simonyan~K., Yang~.Y}
-	\BibTitle{DARTS: Differentiable Architecture Search}. 2018.
-	URL: \BibUrl{https://arxiv.org/abs/1806.09055}.
-	
-	\bibitem{Boston}
-	\BibAuthor{Harrison~Jr. , Rubinfeld~D., Daniel~L.}
-	\BibTitle{Hedonic housing prices and the demand for clean air.} 1978.
-	URL:{https://archive.ics.uci.edu/ml/machine-learning-databases/housing/}.
-	
-	\bibitem{MNIST}
-	\BibAuthor{Yann LeCun, Corinna Cortes, Christopher J.C. Burges, }
-	\BibTitle{The MNIST Database of Handwritten Digits} 1998.
-	URL:{http://yann.lecun.com/exdb/mnist/}
-		
-\end{thebibliography}
+состоящие из множеств пар объект-метка,
+\[
+\mathbf{x}_i\in\mathbf{X}\subset\mathbb{R}^{\text{n}},\quad y_i\in\mathbf{Y}\subset\mathbb{R}.
+\] 
+
+Метка $y$ объекта $\mathbf{x}$ принадлежит множеству $y\in\mathbf{Y}= \{1,\dots,Z\}$, где $Z$ - количество классов.
+\\
+
+Модель задаётся ориентированным графом $\mathbf{G=(V,E)}$, где для каждого ребра $(i,j)$ заданы базовые функции $\mathbf{g}^{i,j}, |\mathbf{g}^{i,j}| = K^{i,j}$ и их веса $\boldsymbol{\gamma}^{i,j}$. Требуется построить такую модель $\mathbf{f}$ c параметрами $\mathbf{W}\in\mathbb{R}^\text{n}$:
+\[
+\mathbf{f}(\mathbf{x}, \mathbf{W})= \{ \mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\}_{i=1}^\mathbf{|V|}
+\]
+
+где $\mathbf{f_i(x, w_i)}$ - подмодель c параметрами $\mathbf{w}_i$ задаётся как:
+\[
+\mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\ = \sum_{j\in adj(i)} \left\langle {\boldsymbol{\gamma}^{i,j}, \mathbf{g}^{i,j}} \right\rangle \mathbf{f}_j(\mathbf{x}, \mathbf{w}_j)\
+\].
+
+Тогда параметры модели определяются как конкатенация всех параметров каждой подмодели: $\mathbf{W}=[\mathbf{w}_1,\dots,\mathbf{w}_\mathbf{|V|}]$, а структура модели $\boldsymbol{\Gamma}$ задаётся вектором $\{ \boldsymbol{\gamma}^{i,j}\}_\mathbf{E}$.
+\\
+
+Функция потерь на обучении $L$ и функция потерь на валидации $Q$ задаются как:
+\[
+L (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{train}|\mathbf{X}^\text{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{\mathbf{A}}||\mathbf{W}||^2,
+\]
+\[
+Q (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}),
+\]
+где $\mathbf{A}$ - регуляризационное слагаемое. Требуется решить задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
+\[
+\mathbf{W}^*( \boldsymbol{\Gamma}) = \argmin_{\mathbf{W}}
+L (\mathbf{W}, \boldsymbol{\Gamma})\]
+
+\[
+\boldsymbol{\Gamma}, \mathbf{A} = \min_{\boldsymbol{\Gamma}} Q (\mathbf{W}^*( \boldsymbol{\Gamma}), \boldsymbol{\Gamma})
+\]
+
+\bibliography{Zabaznov2018Project11.bib}
+\bibliographystyle{unsrt}
 
 \end{document}
