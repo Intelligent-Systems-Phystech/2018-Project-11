@@ -77,9 +77,33 @@
 L (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{train}|\mathbf{X}^\text{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{\mathbf{A}}||\mathbf{W}||^2,
 \]
 \[
-Q (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}),
+Q (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}) + \lambda p(\boldsymbol{\Gamma}),
 \]
-где $\mathbf{A}$ - регуляризационное слагаемое. Требуется решить задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
+где $\mathbf{A}$ и $\lambda$ - регуляризационные слагаемые, $p(\boldsymbol{\Gamma})$ - произведение всех произведение вероятностей всех $\boldsymbol{\gamma}^{i,j} \in \boldsymbol{\Gamma}$. Перед подсчётом значения  функции потерь на валидации делается априорное предположение  о распределении вектора
+$\boldsymbol{\Gamma} = \{ \boldsymbol{\gamma}^{i,j}\}$: вектор структуры модели имеет распределение либо Дирихле\cite{Dirichlet} либо Gumbel-Softmax\cite{Gumbell}.
+\\
+
+Вектор $\{{\gamma}^{i,j}\}$ имеет распределение Дирихле с параметром $\alpha$, если:
+
+\[
+f(\gamma) = f(\gamma_1, \dots,\gamma_K) = 
+\begin{cases}
+\frac{\boldsymbol{F} (K\times\alpha)}{{\boldsymbol{F}(\alpha)}^{K}}\prod\limits_{i = 1}^K\gamma_i,\gamma \in \boldsymbol{S}
+\\
+0, \gamma\notin \boldsymbol{S}
+\end{cases}
+\],
+где $\boldsymbol{F}$ - гамма-функция, $\boldsymbol{S}$ - симплекс: $\{\gamma \in \mathbb{R}^K: \sum_{i=1}^K \gamma_i = 1, \gamma_i \geqslant 0\}$.
+\\
+
+Вектор $\{{\gamma}^{i,j}\}$ имеет распределение Gumbal-Softmax с параметром $\alpha$ и параметром $\tau$, если:
+\[
+f(\gamma_1, \dots,\gamma_K) = (K-1)!\tau^{K-1}\alpha^K\prod\limits_{i = 1}^K\frac{\gamma_i^{-\tau - 1}}{\alpha\sum_{j=1}^K\gamma_j^{-\tau}}
+\]
+При $\tau\to\inf$ распределение Gumbal-Softmax эквивалентно многомерному нормальному распределению.
+\\
+
+Требуется решить задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
 \[
 \mathbf{W}^*( \boldsymbol{\Gamma}) = \argmin_{\mathbf{W}}
 L (\mathbf{W}, \boldsymbol{\Gamma})\]
@@ -87,6 +111,15 @@ L (\mathbf{W}, \boldsymbol{\Gamma})\]
 \[
 \boldsymbol{\Gamma}, \mathbf{A} = \min_{\boldsymbol{\Gamma}} Q (\mathbf{W}^*( \boldsymbol{\Gamma}), \boldsymbol{\Gamma})
 \]
+
+\section{Релаксация}
+Известно множество всех возможных операций $\mathbf{g}^{i,j} \in \mathbf{G}$. Для перехода к непрерывному пространству таких функций проводится релаксация каждой операции:
+\[
+\overline{\mathbf{g}(\mathbf{x})} = \sum_{\gamma \in  \boldsymbol{\Gamma}} \frac{\boldsymbol{e}^{\gamma}}{\sum_{\gamma' \in  \boldsymbol{\Gamma}}\boldsymbol{e}^{\gamma'}}\mathbf{g}(\mathbf{x})
+\]
+
+После релаксации необходимо совместное исследование $\boldsymbol{\Gamma}$ и весов $\boldsymbol{w}$ всех смешанных операциях $\overline{\mathbf{g}^{i,j}}$.
+
 
 \bibliography{Zabaznov2018Project11.bib}
 \bibliographystyle{unsrt}
