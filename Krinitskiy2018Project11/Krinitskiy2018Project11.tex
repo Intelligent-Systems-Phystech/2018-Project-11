@@ -33,6 +33,35 @@
   \par Проверка полученного алгоритма произведена на данных MNIST \cite{MNIST}, CIFAR-10 \cite{CIFAR}, Boston Housing \cite{Boston} также на синтетических данных. Модели, полученные представленным алгоритмом сравниваются с моделями, построенными с использованием базовых алгоритмов.
 
 
+
+\section{2 Постановка задачи}
+Рассмотрим для нашей задачи обучающую и валидационную выборки
+$$
+\mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
+$$
+$$
+\mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}},
+$$
+$\mathbf{x_i}$ - вектор признаков $i$-го объекта, а $y_i\in\mathbf{Y}\subset\mathbb{R}$, $\mathbf{Y} = \{1,\dots,Z\}$, $Z$ - количество классов.\\
+Модель описывается ориентированным графом $(V, E)$. Для каждого ребра $(j, k) \in E$ определён вектор базовых функций $g_{j, k}$ мощностью $K_{j, k}$. Модель $\textbf{f}(\textbf{x}, \textbf{W})$ задаётся параметрами подмоделей $\{f_{v}\}_{v = 1}^{|V|}$ и структурными параметрами $\boldsymbol{\gamma}^{j,k}$.  
+	Каждая подмодель $f_{v}$ представляется следующим образом:
+	
+	 $$f_{v}(\textbf{x}, \textbf{w}_{v}) = \sum\limits_{k \in adj(v_i)} <\gamma_{j, k}, g_{j, k}>f_{k}(\textbf{x}, \textbf{w}_{k}), \quad f_{0}(\textbf{x}) = \textbf{x}.$$ 
+	Параметры модели $\mathbf{W}=[\mathbf{w}_1,\dots,\mathbf{w}_\mathbf{|V|}]$ - конкатенация параметров всех подмоделей $\{f_{v}\}_{v = 1}^{|V|}$, а
+	структура модели $\boldsymbol{\Gamma}$ - конкатенация структурных параметров $\boldsymbol{\gamma}^{j,k}$.
+Пусть $L(\mathfrak{D}^{train},\mathbf{W},\boldsymbol{\Gamma})$ - функция потерь на обучении, а $Q(\mathfrak{D}^{valid},\mathbf{W},\boldsymbol{\Gamma})$ - фунция потерь на валидации. Тогда:
+$$L =  \log p(\mathbf{Y}^\text{train}|\mathbf{X}^\text{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{\mathbf{A}}||\mathbf{W}||^2$$ 
+$$Q =\log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}),
+$$
+$\mathbf{A}$ - гиерпараметр, отвечающий за регуляризацию \\
+Гиперпараметры находятся решением двухуровневой задачи оптимизации:
+$$\boldsymbol{\Gamma},\mathbf{A} = argmin_{\boldsymbol{\Gamma},\mathbf{A}} Q(\mathfrak{D}^{valid},\mathbf{W^*(\boldsymbol{\Gamma},\mathbf{A})},\boldsymbol{\Gamma},\mathbf{A}),$$
+$$\mathbf{W^*} = argmin_W L(\mathfrak{D}^{train},\mathbf{W},\boldsymbol{\Gamma},\mathbf{A})$$
+
+
+\end{document}
+
+
 \begin{thebibliography}{99}
     \bibitem{GaussianModel}
 	\BibAuthor{Carl E.}
@@ -82,8 +111,6 @@
 
 \end{thebibliography}
 
-
-\end{document}
 
 
 
