@@ -21,7 +21,7 @@ class _WeightedLoss(_Loss):
         
 
 class CrossEntropyLoss_GumbelSoftmaxRegularization(_WeightedLoss):
-    def regularization_gumbel_softmax(gamma, temperature, alpha):
+    def regularization_gumbel_softmax(self, gamma, temperature, alpha):
         K = len(gamma)
 
         tmp = 1.0
@@ -50,7 +50,7 @@ class CrossEntropyLoss_GumbelSoftmaxRegularization(_WeightedLoss):
 
 
 class CrossEntropyLoss_DirichletRegularization(_WeightedLoss):
-    def regularization_dirichlet(gamma, alpha):
+    def regularization_dirichlet(self, gamma, alpha):
         assert sum(gamma[0:len(gamma)]) == 1.0
 
         K = len(gamma)
