@@ -78,6 +78,25 @@ def _data_transforms_cifar10(args):
     ])
   return train_transform, valid_transform
 
+  def _data_transforms_mnist(args):
+  MNIST_MEAN = (0.1307,)
+  MNIST_STD = (0.3081,)
+
+  train_transform = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(MNIST_MEAN, MNIST_STD),
+  ])
+  if args.cutout:
+    train_transform.transforms.append(Cutout(args.cutout_length))
+
+  valid_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(MNIST_MEAN, MNIST_STD),
+    ])
+  return train_transform, valid_transform
+
 
 def count_parameters_in_MB(model):
   return np.sum(np.prod(v.size()) for name, v in model.named_parameters() if "auxiliary" not in name)/1e6

@@ -28,7 +28,7 @@ class MixedOp(nn.Module): ##initializing g'(x) = sum(softmax(gamma) g(x))
 
 
 class Network(nn.Module):
-    def __init__(self,in_features,num_classes,layers_size,layers,criterion): 
+    def __init__(self, in_features, num_classes, layers_size, layers, criterion): 
         super(Network, self).__init__()
         self._in_features = in_features
         self._num_classes = num_classes
