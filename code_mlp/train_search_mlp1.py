@@ -20,8 +20,7 @@ from architect import Architect
 
 
 
-
-
+layers_size = [100, 400, 800, 12]
 
 
 
@@ -36,7 +35,7 @@ parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
 parser.add_argument('--report_freq', type=float, default=50, help='report frequency')
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
-parser.add_argument('--epochs', type=int, default=5, help='num of training epochs')
+parser.add_argument('--epochs', type=int, default=10, help='num of training epochs')
 parser.add_argument('--init_channels', type=int, default=1, help='num of init channels')
 parser.add_argument('--layers', type=int, default=2, help='total number of layers')
 parser.add_argument('--model_path', type=str, default='saved_models', help='path to save the model')
@@ -47,7 +46,7 @@ parser.add_argument('--save', type=str, default='EXP', help='experiment name')
 parser.add_argument('--seed', type=int, default=2, help='random seed')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--train_portion', type=float, default=0.5, help='portion of training data')
-parser.add_argument('--unrolled', action='store_true', default=False, help='use one-step unrolled validation loss')
+parser.add_argument('--unrolled', action='store_true', default=True, help='use one-step unrolled validation loss')
 parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 args = parser.parse_args()
@@ -67,24 +66,24 @@ CIFAR_CLASSES = 10
 
 
 def main():
-  if not torch.cuda.is_available():
-    logging.info('no gpu device available')
-    sys.exit(1)
+  # if not torch.cuda.is_available():
+  #   logging.info('no gpu device available')
+  #   sys.exit(1)
 
   np.random.seed(args.seed)
-  torch.cuda.set_device(args.gpu)
+  # torch.cuda.set_device(args.gpu)
   cudnn.benchmark = True
   torch.manual_seed(args.seed)
   cudnn.enabled=True
-  torch.cuda.manual_seed(args.seed)
+  # torch.cuda.manual_seed(args.seed)
   logging.info('gpu device = %d' % args.gpu)
   logging.info("args = %s", args)
 
   criterion = nn.CrossEntropyLoss()
-  criterion = criterion.cuda()
+  criterion = criterion
 #  model = Network(args.init_channels, 10, args.layers, criterion)
   model = Network(784,10,layers_size,1,10,criterion)
-  model = model.cuda()
+  model = model
   logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
 
   optimizer = torch.optim.SGD(
@@ -93,7 +92,7 @@ def main():
       momentum=args.momentum,
       weight_decay=args.weight_decay)
 
-  train_transform, valid_transform = utils._data_transforms_cifar10(args)
+  train_transform, valid_transform = utils._data_transforms_mnist(args)
   train_data = dset.MNIST(root=args.data, train=True, download=True, transform=train_transform)
 
   num_train = len(train_data)
@@ -103,7 +102,7 @@ def main():
   train_queue = torch.utils.data.DataLoader(
       train_data, batch_size=args.batch_size,
       sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
-      pin_memory=True, num_workers=2)
+      pin_memory=True)
 
   valid_queue = torch.utils.data.DataLoader(
       train_data, batch_size=args.batch_size,
@@ -123,7 +122,7 @@ def main():
     genotype = model.genotype()
     logging.info('genotype = %s', genotype)
 
-    print(F.softmax(model.alphas, dim=-1))
+    
 
 
     # training
@@ -146,13 +145,13 @@ def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr):
     model.train()
     n = input.size(0)
 
-    input = Variable(input, requires_grad=False).cuda()
-    target = Variable(target, requires_grad=False).cuda()
+    input = Variable(input, requires_grad=False)
+    target = Variable(target, requires_grad=False)
 
     # get a random minibatch from the search queue with replacement
     input_search, target_search = next(iter(valid_queue))
-    input_search = Variable(input_search, requires_grad=False).cuda()
-    target_search = Variable(target_search, requires_grad=False).cuda()
+    input_search = Variable(input_search, requires_grad=False)
+    target_search = Variable(target_search, requires_grad=False)
 
     architect.step(input, target, input_search, target_search, lr, optimizer, unrolled=args.unrolled)
 
@@ -182,8 +181,8 @@ def infer(valid_queue, model, criterion):
   model.eval()
 
   for step, (input, target) in enumerate(valid_queue):
-    input = Variable(input, volatile=True).cuda()
-    target = Variable(target, volatile=True).cuda()
+    input = Variable(input, volatile=True)
+    target = Variable(target, volatile=True)
 
     logits = model(input)
     loss = criterion(logits, target)
@@ -202,8 +201,6 @@ def infer(valid_queue, model, criterion):
 
 if __name__ == '__main__':
   main() 
-
-print(x)
 
 ##train_data = dset.MNIST(root = '../', train=True, download=True)
 

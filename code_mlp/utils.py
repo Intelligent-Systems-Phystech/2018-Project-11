@@ -78,14 +78,15 @@ def _data_transforms_cifar10(args):
     ])
   return train_transform, valid_transform
 
-  def _data_transforms_mnist(args):
+def _data_transforms_mnist(args):
   MNIST_MEAN = (0.1307,)
   MNIST_STD = (0.3081,)
 
   train_transform = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
-    transforms.RandomHorizontalFlip(),
+    
+    
     transforms.ToTensor(),
+
     transforms.Normalize(MNIST_MEAN, MNIST_STD),
   ])
   if args.cutout:
@@ -121,7 +122,7 @@ def load(model, model_path):
 def drop_path(x, drop_prob):
   if drop_prob > 0.:
     keep_prob = 1.-drop_prob
-    mask = Variable(torch.cuda.FloatTensor(x.size(0), 1, 1, 1).bernoulli_(keep_prob))
+    mask = Variable(torch.FloatTensor(x.size(0), 1, 1, 1).bernoulli_(keep_prob))
     x.div_(keep_prob)
     x.mul_(mask)
   return x

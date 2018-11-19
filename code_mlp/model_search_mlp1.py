@@ -47,25 +47,25 @@ class Network(nn.Module):
             op = MixedOp(self._out_shape, self._layers_size,self._out_shape)
             self._ops.append(op)
         
-        self._ops.append(Softmax(self._out_shape,self._num_classes,self._num_classes)) # softmax layer in the end to get normalized values
+        self._ops.append(Softmax_without_reshape(self._out_shape,self._num_classes,self._num_classes)) # softmax layer in the end to get normalized values
         
     def _initialize_alphas(self): #init gamma randomly
         k = self._layers
         num_ops = len(PRIMITIVES)*len(self._layers_size)
-        self.alphas = Variable(1e-3*torch.randn(k, num_ops).cuda(), requires_grad=True)
+        self.alphas = Variable(1e-3*torch.randn(k, num_ops), requires_grad=True)
         self._arch_parameters = [
           self.alphas
         ]
     def forward(self,x):  
-        weights = F.softmax(self.alphas, dim=-1).cuda()
-        x = x.view(-1,784)
+        weights = F.softmax(self.alphas, dim=-1)
+        
         for i in range(self._layers):
             x = self._ops[i](x,weights[i,:])
         logits = self._ops[-1](x)
         return logits
     def new(self):
         model_new = Network(self._in_features, self._num_classes,self._layers_size,
-                            self._layers, self._criterion).cuda()
+                            self._layers, self._criterion)
         for x, y in zip(model_new.arch_parameters(), self.arch_parameters()):
             x.data.copy_(y.data)
         return model_new

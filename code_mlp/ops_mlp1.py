@@ -14,7 +14,22 @@ OPS_NEW = {
         'relu' : lambda in_features,out_features, out_size : ReLU(in_features,out_features, out_size),
         'tanh' : lambda in_features,out_features, out_size : Tanh(in_features,out_features, out_size)   
         }  ##list of available operations in each layer must be implemented as below
-
+class Softmax_without_reshape(nn.Module): #softmax(w.transpose*x)
+    def __init__(self,in_features,out_features,out_size):
+        super(Softmax_without_reshape,self).__init__()
+        self.out_size = out_size
+        self.out_features = out_features
+        self.op = nn.Sequential(
+            nn.Linear(in_features,out_features),
+            nn.Softmax()
+            )
+    def forward(self,x):
+        # print(self.out_size,"  ",self.out_features, x.size() )
+        
+        if self.out_size != self.out_features:
+            return torch.cat((self.op(x),torch.zeros(x.size()[0],self.out_size-self.out_features)), dim = 1)
+        else:
+            return self.op(x)
 
 class Softmax(nn.Module): #softmax(w.transpose*x)
     def __init__(self,in_features,out_features,out_size):
@@ -26,9 +41,10 @@ class Softmax(nn.Module): #softmax(w.transpose*x)
             nn.Softmax()
             )
     def forward(self,x):
-        print(self.out_size,"  ",self.out_features )
+        # print(self.out_size,"  ",self.out_features, x.size() )
+        x = x.reshape((x.size()[0],784))
         if self.out_size != self.out_features:
-            return torch.cat((self.op(x),torch.zeros(x.size()[0],self.out_size-self.out_features).cuda()), dim = 1).cuda()
+            return torch.cat((self.op(x),torch.zeros(x.size()[0],self.out_size-self.out_features)), dim = 1)
         else:
             return self.op(x)
 
@@ -42,8 +58,10 @@ class ReLU(nn.Module):
             nn.ReLU()
             )
     def forward(self,x):
+        # print(self.out_size,"  ",self.out_features, x.size())
+        x = x.reshape((x.size()[0],784))
         if self.out_size != self.out_features:
-            return torch.cat((self.op(x),torch.zeros(x.size()[0],self.out_size-self.out_features).cuda()), dim = 1).cuda()
+            return torch.cat((self.op(x),torch.zeros(x.size()[0],self.out_size-self.out_features)), dim = 1)
         else:
             return self.op(x)
 class Tanh(nn.Module):
@@ -56,7 +74,9 @@ class Tanh(nn.Module):
             nn.Tanh()
             )
     def forward(self,x):
+        # print(self.out_size,"  ",self.out_features, x.size() )
+        x = x.reshape((x.size()[0],784))
         if self.out_size != self.out_features:
-            return torch.cat((self.op(x),torch.zeros(x.size()[0],self.out_size-self.out_features).cuda()), dim = 1).cuda()
+            return torch.cat((self.op(x),torch.zeros(x.size()[0],self.out_size-self.out_features)), dim = 1)
         else:
             return self.op(x)
