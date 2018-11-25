@@ -12,7 +12,7 @@
 
 
 \abstract{\textbf{Аннотация}:
-В этой статье рассматривается задача поиска оптимальной структуры нейронной сети. Нейросеть рассматривается как вычислительный граф, реализуемый с помощью библиотеки Pytorch. Предусматривается, что число структурных параметров можно уменьшить без существенной потери качества классификации или регрессии. Будут изучены изменения характеристик нейронной сети при колебании структурных параметров. Итоговым результатом будет являться модель , дающая приемлемое качество классификации либо регрессии, и не являющаяся избыточной по параметрам.
+В этой статье рассматривается задача поиска оптимальной структуры нейронной сети. Нейросеть рассматривается как вычислительный граф, реализуемый с помощью библиотеки Pytorch. Предусматривается, что число структурных параметров можно уменьшить без существенной потери качества классификации или регрессии. Исследуются изменения характеристик нейронной сети при колебании структурных параметров. Предлагается новый метод, учитывающий особенности задачи, который совершенствует структуру нейронной сети в процессе оптимизации. Итоговым результатом  является модель , дающая приемлемое качество классификации либо регрессии, и не являющаяся избыточной по параметрам. Для анализа качества представленного алгоритма проводятся эксперименты на выборках Boston, MNIST и CIFAR-10.
 
 \bigskip
 
@@ -21,7 +21,6 @@
 \textbf{Ключевые слова}:  \emph{нейронные сети, графовые вычисления, оптимизация гиперпараметров, вариационный вывод}
 
 }
-
 \begin{document}
 
 \maketitle
@@ -34,8 +33,8 @@
 
 
 
-\section{2 Постановка задачи}
-Рассмотрим для нашей задачи обучающую и валидационную выборки
+\section{Постановка задачи}
+Пусть заданы обучающая и валидационная выборки
 $$
 \mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
 $$
@@ -43,26 +42,28 @@ $$
 \mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}},
 $$
 $\mathbf{x_i}$ - вектор признаков $i$-го объекта, а $y_i\in\mathbf{Y}\subset\mathbb{R}$, $\mathbf{Y} = \{1,\dots,Z\}$, $Z$ - количество классов.\\
-Модель описывается ориентированным графом $(V, E)$. Для каждого ребра $(j, k) \in E$ определён вектор базовых функций $g_{j, k}$ мощностью $K_{j, k}$. Модель $\textbf{f}(\textbf{x}, \textbf{W})$ задаётся параметрами подмоделей $\{f_{v}\}_{v = 1}^{|V|}$ и структурными параметрами $\boldsymbol{\gamma}^{j,k}$.  
+Модель описывается ориентированным графом $(V, E)$. Для каждого ребра $(j, k) \in E$ определён вектор базовых функций $\textbf{g}_{j, k}$ мощностью $K_{j, k}$. Модель $\textbf{f}(\textbf{x}, \textbf{W})$ задаётся параметрами подмоделей $\{\textbf{f}_{v}\}_{v = 1}^{|V|}$ и структурными параметрами $\boldsymbol{\gamma}^{j,k}$.  
 	Каждая подмодель $f_{v}$ представляется следующим образом:
 	
-	 $$f_{v}(\textbf{x}, \textbf{w}_{v}) = \sum\limits_{k \in adj(v_i)} <\gamma_{j, k}, g_{j, k}>f_{k}(\textbf{x}, \textbf{w}_{k}), \quad f_{0}(\textbf{x}) = \textbf{x}.$$ 
-	Параметры модели $\mathbf{W}=[\mathbf{w}_1,\dots,\mathbf{w}_\mathbf{|V|}]$ - конкатенация параметров всех подмоделей $\{f_{v}\}_{v = 1}^{|V|}$, а
-	структура модели $\boldsymbol{\Gamma}$ - конкатенация структурных параметров $\boldsymbol{\gamma}^{j,k}$.
-Пусть $L(\mathfrak{D}^{train},\mathbf{W},\boldsymbol{\Gamma})$ - функция потерь на обучении, а $Q(\mathfrak{D}^{valid},\mathbf{W},\boldsymbol{\Gamma})$ - фунция потерь на валидации. Тогда:
-$$L =  \log p(\mathbf{Y}^\text{train}|\mathbf{X}^\text{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{\mathbf{A}}||\mathbf{W}||^2$$ 
+	 $$f_{v}(\textbf{x}, \textbf{w}_{v}) = \sum\limits_{k \in adj(v_i)} \langle \gamma_{j, k}, g_{j, k} \rangle f_{k}(\textbf{x}, \textbf{w}_{k}), \quad f_{0}(\textbf{x}) = \textbf{x}.$$ 
+	Параметры модели $\mathbf{W}=[\mathbf{w}_1,\dots,\mathbf{w}_\mathbf{|V|}]$ - конкатенация параметров всех подмоделей $\{f_{v}\}_{v = 1}^x{|V|}$, а
+	структура модели $\boldsymbol{\Gamma}$ - конкатенация структурных параметров $\boldsymbol{\gamma}^{j,k}$. \\
+Пусть $L(\mathfrak{D}^{train},\mathbf{W},\boldsymbol{\Gamma}, \textbf{A})$ - функция потерь на обучении, а $Q(\mathfrak{D}^{valid},\mathbf{W},\boldsymbol{\Gamma})$ - фунция потерь на валидации. Тогда:
+$$L =  \log p(\mathbf{Y}^\text{train}|\mathbf{X}^\text{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{\mathbf{A}}||\mathbf{W}||^2,$$
 $$Q =\log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}),
 $$
-$\mathbf{A}$ - гиерпараметр, отвечающий за регуляризацию \\
+$\mathbf{A}$ - гиперпараметр, отвечающий за регуляризацию. \\
 Гиперпараметры находятся решением двухуровневой задачи оптимизации:
-$$\boldsymbol{\Gamma},\mathbf{A} = argmin_{\boldsymbol{\Gamma},\mathbf{A}} Q(\mathfrak{D}^{valid},\mathbf{W^*(\boldsymbol{\Gamma},\mathbf{A})},\boldsymbol{\Gamma},\mathbf{A}),$$
+$$\boldsymbol{\Gamma^{*}},\mathbf{A^{*}} = argmin_{\boldsymbol{\Gamma},\mathbf{A}} Q(\mathfrak{D}^{valid},\mathbf{W^*(\boldsymbol{\Gamma},\mathbf{A})},\boldsymbol{\Gamma},\mathbf{A}),$$
 $$\mathbf{W^*} = argmin_W L(\mathfrak{D}^{train},\mathbf{W},\boldsymbol{\Gamma},\mathbf{A})$$
 
 
-\end{document}
+
+\begin{thebibliography}{}
 
 
-\begin{thebibliography}{99}
+
+
     \bibitem{GaussianModel}
 	\BibAuthor{Carl E.}
 	\BibTitle{Gaussian Processes in Machine Learning}. 2005.
@@ -112,5 +113,5 @@ $$\mathbf{W^*} = argmin_W L(\mathfrak{D}^{train},\mathbf{W},\boldsymbol{\Gamma},
 \end{thebibliography}
 
 
-
+\end{document}
 
