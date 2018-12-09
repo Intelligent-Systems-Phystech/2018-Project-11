@@ -31,6 +31,86 @@
 
 Для оценки полученной системы используются выборки MNIST~\cite{lecun-mnist}, CIFAR-10. Предметом оценки является не только точность ответов на тестовой подвыборке, но и устойчивость результатов.
 
+\section{Постановка задачи}
+
+Пусть заданы обучающая и вылидационная выборки:
+\[
+\mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
+\]
+\[
+\mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}},
+\]
+
+состоящие из множеств пар объект-метка,
+\[
+\mathbf{x}_i\in\mathbf{X}\subset\mathbb{R}^{\text{n}},\quad y_i\in\mathbf{Y}\subset\mathbb{R}.
+\] 
+
+Метка $y$ объекта $\mathbf{x}$ принадлежит множеству $y\in\mathbf{Y}= \{1,\dots,Z\}$, где $Z$ - количество классов.
+\\
+
+Модель задаётся ориентированным графом $\mathbf{G=(V,E)}$, где для каждого ребра $(i,j)$ заданы базовые функции $\mathbf{g}^{i,j}, |\mathbf{g}^{i,j}| = K^{i,j}$ и их веса $\boldsymbol{\gamma}^{i,j}$. Требуется построить такую модель $\mathbf{f}$ c параметрами $\mathbf{W}\in\mathbb{R}^\text{n}$:
+\[
+\mathbf{f}(\mathbf{x}, \mathbf{W})= \{ \mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\}_{i=1}^\mathbf{|V|}
+\]
+
+где $\mathbf{f_i(x, w_i)}$ - подмодель c параметрами $\mathbf{w}_i$ задаётся как:
+\[
+\mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\ = \sum_{j\in adj(i)} \left\langle {\boldsymbol{\gamma}^{i,j}, \mathbf{g}^{i,j}} \right\rangle \mathbf{f}_j(\mathbf{x}, \mathbf{w}_j)\
+\].
+
+Тогда параметры модели определяются как конкатенация всех параметров каждой подмодели: $\mathbf{W}=[\mathbf{w}_1,\dots,\mathbf{w}_\mathbf{|V|}]$, а структура модели $\boldsymbol{\Gamma}$ задаётся вектором $\{ \boldsymbol{\gamma}^{i,j}\}_\mathbf{E}$.
+\\
+
+Функция потерь на обучении $L$ и функция потерь на валидации $Q$ задаются как:
+\[
+L (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{train}|\mathbf{X}^\text{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{\mathbf{A}}||\mathbf{W}||^2,
+\]
+\[
+Q (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}) + \lambda p(\boldsymbol{\Gamma}),
+\]
+где $\mathbf{A}$ и $\lambda$ - регуляризационные слагаемые, $p(\boldsymbol{\Gamma})$ - произведение всех произведение вероятностей всех $\boldsymbol{\gamma}^{i,j} \in \boldsymbol{\Gamma}$. Перед подсчётом значения  функции потерь на валидации делается априорное предположение  о распределении вектора
+$\boldsymbol{\Gamma} = \{ \boldsymbol{\gamma}^{i,j}\}$: вектор структуры модели имеет распределение либо Дирихле\cite{Dirichlet} либо Gumbel-Softmax\cite{Gumbell}.
+\\
+
+Вектор $\{{\gamma}^{i,j}\}$ имеет распределение Дирихле с параметром $\alpha$, если:
+
+\[
+f(\gamma) = f(\gamma_1, \dots,\gamma_K) = 
+\begin{cases}
+\frac{\boldsymbol{F} (K\times\alpha)}{{\boldsymbol{F}(\alpha)}^{K}}\prod\limits_{i = 1}^K\gamma_i,\gamma \in \boldsymbol{S}
+\\
+0, \gamma\notin \boldsymbol{S}
+\end{cases}
+\],
+где $\boldsymbol{F}$ - гамма-функция, $\boldsymbol{S}$ - симплекс: $\{\gamma \in \mathbb{R}^K: \sum_{i=1}^K \gamma_i = 1, \gamma_i \geqslant 0\}$.
+\\
+
+Вектор $\{{\gamma}^{i,j}\}$ имеет распределение Gumbal-Softmax с параметром $\alpha$ и параметром $\tau$, если:
+\[
+f(\gamma_1, \dots,\gamma_K) = (K-1)!\tau^{K-1}\alpha^K\prod\limits_{i = 1}^K\frac{\gamma_i^{-\tau - 1}}{\alpha\sum_{j=1}^K\gamma_j^{-\tau}}
+\]
+При $\tau\to\inf$ распределение Gumbal-Softmax эквивалентно многомерному равномерному распределению.
+\\
+
+Требуется решить задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
+\[
+\mathbf{W}^*( \boldsymbol{\Gamma}) = \argmin_{\mathbf{W}}
+L (\mathbf{W}, \boldsymbol{\Gamma})\]
+
+\[
+\boldsymbol{\Gamma}, \mathbf{A} = \min_{\boldsymbol{\Gamma}} Q (\mathbf{W}^*( \boldsymbol{\Gamma}), \boldsymbol{\Gamma})
+\]
+
+\section{Релаксация}
+Известно множество всех возможных операций $\mathbf{g}^{i,j} \in \mathbf{G}$. Для перехода к непрерывному пространству таких функций проводится релаксация каждой операции:
+\[
+\overline{\mathbf{g}(\mathbf{x})} = \sum_{\gamma \in  \boldsymbol{\Gamma}} \frac{\boldsymbol{e}^{\gamma}}{\sum_{\gamma' \in  \boldsymbol{\Gamma}}\boldsymbol{e}^{\gamma'}}\mathbf{g}(\mathbf{x})
+\]
+
+После релаксации необходимо совместное исследование $\boldsymbol{\Gamma}$ и весов $\boldsymbol{w}$ всех смешанных операциях $\overline{\mathbf{g}^{i,j}}$.
+
+
 \bibliography{Gubanov2018Project11}
 \bibliographystyle{unsrt}
 \end{document}
