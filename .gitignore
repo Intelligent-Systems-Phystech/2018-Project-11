@@ -1,3 +1,4 @@
+*__pycache__/
 *.txt
 *.sty
 *.aux
@@ -5,3 +6,6 @@
 *.swp
 Gubanov2018Project11/guides/
 *.gz
+*.DS*
+~*
+*.synctex*
