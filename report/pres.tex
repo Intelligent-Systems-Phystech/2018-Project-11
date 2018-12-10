@@ -108,6 +108,24 @@ $\mathbf{g}^{i,j} $--- базовые функции ребра $(i, j) $ c ве
 
 \begin{frame}{Постановка задачи}
 
+Функция потерь на обучении $L$ и функция потерь на валидации $Q$ задаются как:
+\[
+L (\mathbf{W}, \mathbf{A}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{train}|\mathbf{X}^\text{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{\mathbf{A}}||\mathbf{W}||^2,
+\]
+\[
+Q (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}) + \lambda p(\boldsymbol{\Gamma}),
+\]
+где $\mathbf{A}$ и $\lambda$ --- регуляризационные слагаемые, $p(\boldsymbol{\Gamma})$ - произведение всех произведение вероятностей всех $\boldsymbol{\gamma}^{i,j} \in \boldsymbol{\Gamma}$. \\
+~\\
+Требуется решить задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
+\[
+\mathbf{W}^*( \boldsymbol{\Gamma}) = \argmin_{\mathbf{W}}
+L (\mathbf{W}, \boldsymbol{\Gamma})\]
+
+\[
+\boldsymbol{\Gamma}^*, \mathbf{A}^* = \min_{\boldsymbol{\Gamma}, \mathbf{A}} Q (\mathbf{W}^*( \boldsymbol{\Gamma}), \boldsymbol{\Gamma})
+\]
+
 
 
 \end{frame}
