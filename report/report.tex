@@ -3,6 +3,7 @@
 
 \usepackage{graphicx}
 \graphicspath{ {pic/} }
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \usepackage{wrapfig}
 
 %\NOREVIEWERNOTES
@@ -154,9 +155,9 @@ $$Accuracy = \frac{1}{m^\text{valid}}\sum_{\mathbf{x}, y \in \mathfrak{D}^\text{
 На рис.~1 изображена общая динамика изменения структурных параметров в процессе обучения.
 \begin{figure}[!htbp]
 	\centering
-	\subfloat[1 режим] {\includegraphics[width=0.5\textwidth]{alphas_weak}}
-	\subfloat[2 режим] {\includegraphics[width=0.5\textwidth]{alphas_variable}}\\
-	\subfloat[3 режим] {\includegraphics[width=0.5\textwidth]{alphas_strong}}
+	\subfloat[1 режим] {\includegraphics[width=0.5\textwidth]{pic/alphas_weak.jpeg}}
+	\subfloat[2 режим] {\includegraphics[width=0.5\textwidth]{pic/alphas_variable.jpeg}}\\
+	\subfloat[3 режим] {\includegraphics[width=0.5\textwidth]{pic/alphas_strong.jpeg}}
 	\caption{}
 	\label{}
 \end{figure}
@@ -165,24 +166,37 @@ $$Accuracy = \frac{1}{m^\text{valid}}\sum_{\mathbf{x}, y \in \mathfrak{D}^\text{
 
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.5\textwidth]{accuracy}
+	\includegraphics[width=0.5\textwidth]{pic/accuracy.jpeg}
 	\caption{}
 	\label{}
 \end{figure}
 
-На рис.~4 показана таблица с усредненным по 3 запускам в каждом режиме top-1 и top-5 accuracy.
+На рис.~3 показана таблица с усредненным по 3 запускам в каждом режиме top-1 и top-5 accuracy.
 
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.5\textwidth]{accuracy_table}
+	\includegraphics[width=0.5\textwidth]{pic/accuracy_table.jpeg}
 	\caption{}
 	\label{}
 \end{figure}
 
-Результаты эксперимента представлены на Рис.<перечесление рисунков> и в Табл. <номер таблицы> \\
-  
-  
-  
+Рисунок ~4 отражает поведение в сети в зависимости от присутствия в данных случайного шума, используется нормальное распределение с нулевым математическим ожиданием.
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[width=1\linewidth]{pic/noise1_graph.pdf}
+	\caption{}
+	\label{}
+\end{figure}
+
+На рис.~5 также изображено поведение модели в условиях наложение случайного шума на параметры модели.
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\linewidth]{pic/noise_params_graph.pdf}
+	\caption{}
+	\label{}
+\end{figure}
+
+
 \bibliography{report.bib}
 \bibliographystyle{unsrt}
 
