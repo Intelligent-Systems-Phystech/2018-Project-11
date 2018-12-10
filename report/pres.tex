@@ -64,13 +64,13 @@
 \begin{frame}{Литература}
 
 	\begin{itemize}
-		\item \textit{LeCun Y., Denker J. , Solla S.}\\ Optimal Brain Damage~// Advances in Neural Information Processing Systems, 1989. Vol. 2. P. 598--605.
-		\item	\textit{Graves A.}\\ Practical Variational Inference for Neural Networks~// Advances in Neural Information Processing Systems, 2011. P. 2348--2356.
+		\item \textit{Yang .Y Hanxiao L., Simonyan K.}\\ Darts: Differentiable architecture search. 2018.
+		\item	\textit{Dougal Maclaurin, David Duvenaud, Ryan P. Adams}Gradient-based hyperparameter optimization through reversible learning. In Francis Bach and David Blei, editors, Proceedings of the 32nd International Conference on Machine Learning, volume 37 of Proceedings of Machine Learning Research, pages 2113–2122, Lille, France, 07–09 Jul 2015. PMLR.
 	\end{itemize}
 	
 	\begin{itemize}
-		\item \textit{Bishop C.}\\ Pattern Recognition and Machine Learning. --- Berlin: Springer, 2006. 758 p.
-		\item \textit{Grunwald P. A}\\  Tutorial introduction to the minimum description length principle. 2005.		
+		\item \textit{Tommi S. Jaakkol Harald Steck} On the dirichlet prior and bayesian regularization.
+		\item \textit{LeCun Y., Denker J. , Solla S.}\\ Optimal Brain Damage~// Advances in Neural Information Processing Systems, 1989. Vol. 2. P. 598--605.	
 	\end{itemize}
 	
 \end{frame}
@@ -117,7 +117,7 @@ Q (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\
 \]
 где $\mathbf{A}$ и $\lambda$ --- регуляризационные слагаемые, $p(\boldsymbol{\Gamma})$ - произведение всех произведение вероятностей всех $\boldsymbol{\gamma}^{i,j} \in \boldsymbol{\Gamma}$. \\
 ~\\
-Требуется решить задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
+Требуется построить модель классификации $\mathbf{f}$ с параметрами $\mathbf{W}$, доставляющую минимум функции потерь на валидации $\mathbf{Q}$.
 \[
 \mathbf{W}^*( \boldsymbol{\Gamma}) = \argmin_{\mathbf{W}}
 L (\mathbf{W}, \boldsymbol{\Gamma})\]
