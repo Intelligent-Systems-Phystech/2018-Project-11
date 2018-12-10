@@ -77,7 +77,8 @@
 %----------------------------------------------------------------------------------------------------------
 
 \begin{frame}{Постановка задачи}
-
+Рассматриваем задачу классификации.\\
+Пусть заданы обучающая и вылидационная выборки:
 \[
 \mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
 \]
@@ -132,56 +133,17 @@ L (\mathbf{W}, \boldsymbol{\Gamma})\]
 
 %----------------------------------------------------------------------------------------------------------
 \begin{frame}{Идея для базовых алгоритмов}
-Рассматриваем задачу классификации.\\
-Пусть заданы обучающая и вылидационная выборки:
-\[
-\mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
-\]
-\[
-\mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}},
-\]
- Модель задаётся ориентированным графом $\mathbf{G=(V,E)}$, где для каждого ребра $(i,j)$ заданы базовые функции $\mathbf{g}^{i,j}, |\mathbf{g}^{i,j}| = K^{i,j}$ и их веса $\boldsymbol{\gamma}^{i,j}$.\\ Модель $\mathbf{f}$ c параметрами $\mathbf{W}\in\mathbb{R}^\text{n}$:
-\[
-\mathbf{f}(\mathbf{x}, \mathbf{W})= \{ \mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\}_{i=1}^\mathbf{|V|}
-\]
-где $\mathbf{f_i(x, w_i)}$ - подмодель:
-\[
-\mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\ = \sum_{j\in adj(i)} \left\langle {\boldsymbol{\gamma}^{i,j}, \mathbf{g}^{i,j}} \right\rangle \mathbf{f}_j(\mathbf{x}, \mathbf{w}_j)\
-\]
+Известно множество всех возможных операций $\mathbf{g}^{i,j} \in \mathbf{G}$. Для перехода к непрерывному пространству таких функций проводится релаксация каждой операции c использованием softmax:
 
-\end{frame}
-%----------------------------------------------------------------------------------------------------------
-\begin{frame}{Идея для базовых алгоритмов}
 
-Решаем задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
-\[
-\mathbf{W}^*( \boldsymbol{\Gamma}) = \argmin_{\mathbf{W}}
-L (\mathbf{W}, \boldsymbol{\Gamma})\]
+$$\overline{\mathbf{g}}^{(i, j)}(x) = \sum\limits_{\mathbf{g} \in \mathbb{K}}{\frac{exp(\gamma_{\mathbf{g}}^{(i, j)})}{\sum\limits_{\overline{\mathbf{g}} \in \mathbb{K}}exp(\gamma_{\overline{\mathbf{g}}}^{(i, j)})}\mathbf{g}(x)},$$
 
-\[
-\boldsymbol{\Gamma}^*, \mathbf{A}^* = \min_{\boldsymbol{\Gamma}, \mathbf{A}} Q (\mathbf{W}^*( \boldsymbol{\Gamma}), \boldsymbol{\Gamma})
-\]
 
+где $\gamma^{i, j}$ --- вектор, параметризующий комбинацию базовых функций. Таким образом, путём подбора  непрерывных параметров  $\gamma$ осуществляется переход к задаче поиска базовой функции. В конце поиска, каждая комбинация базовых функций $\overline{\mathbf{g}}^{(i, j)}(x) $  меняется на $\mathbf{g}^{(i, j)} = \argmax\limits_{\mathbf{g} \in \mathbb{K}}\gamma_{\mathbf{g}}^{(i, j)}$.\\
 
 
 \end{frame}
-%----------------------------------------------------------------------------------------------------------
-\begin{frame}{Регуляризация структуры}
 
-Для регуляризация структуры модели к фунции потерь прибавляется специальное слагаемого $\lambda P(\Gamma)$, где $P(\Gamma)$ есть произведение всех вероятностей возникновения веса $\gamma_{i, j, k}$.
-Таким образом функция потерь принимает вид:
-
-\[
-Q = \text{log p}(\mathbf{Y}^{valid}|\mathbf{X}^{valid}, \mathbf{W}, \boldsymbol{\Gamma}) + \lambda P(\Gamma)
-\]
-\[
-L = \text{log p}(\mathbf{Y}^{train}|\mathbf{X}^{train}, \mathbf{W}, \boldsymbol{\Gamma}) + \boldsymbol{e}^{(\mathbf{A}||\mathbf{W}||^2)} 
-\]
-Таким образом наша задача принимает такой вид: \\
-$$\boldsymbol{\Gamma},\mathbf{A} = argmin_{\boldsymbol{\Gamma},\mathbf{A}} Q(\mathfrak{D}^{valid},\mathbf{W^*(\boldsymbol{\Gamma},\mathbf{A})},\boldsymbol{\Gamma},\mathbf{A}),$$
-$$\mathbf{W^*} = argmin_W L(\mathfrak{D}^{train},\mathbf{W},\boldsymbol{\Gamma},\mathbf{A})$$
-
-\end{frame}
 %----------------------------------------------------------------------------------------------------------
 \begin{frame}{Описание эксперимента}
 В качестве выборки использовалась выборка изображений CIFAR-10. Основным критерием качества выступал 
