@@ -1,0 +1,323 @@
+\documentclass[10pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath,mathrsfs,mathtext}
+\usepackage{graphicx, epsfig}
+\usepackage{caption}
+\usepackage{subfig}
+\usepackage{amsmath}
+
+\usepackage{multicol}
+
+\usepackage{tikz}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\makeatletter
+\let\@@magyar@captionfix\relax
+\makeatother
+
+\fontsize{10}{15}
+
+\usetheme{Warsaw}
+\usecolortheme{sidebartab}
+\definecolor{beamer@blendedblue}{RGB}{31,96,49}
+
+%----------------------------------------------------------------------------------------------------------
+\title[\hbox to 56mm{Нейросети оптимальной сложности  \hfill\insertframenumber\,/\,\inserttotalframenumber}]
+{Автоматическое построение нейросети оптимальной сложности }
+\author[В.\,О. Маркин, А.\,Г. Забазнов, Н.\,А. Горян, С.\,Е. Губанов, С.\,К. Таранов]{\large \\Маркин Валерий, Забазнов Антон, Горян Николай, Сергей Губанов, Сергей Таранов, Товкес Артём, Улитин Александр, Криницкий Константин}
+\institute{\large
+Московский физико-технический институт}
+
+\date{\footnotesize{10 декабря, 2018г.}}
+%----------------------------------------------------------------------------------------------------------
+\begin{document}
+%----------------------------------------------------------------------------------------------------------
+\begin{frame}
+\titlepage
+\end{frame}
+%-----------------------------------------------------------------------------------------------------
+\begin{frame}{Цель работы}
+
+{\bf Иследуется}\\
+\quad
+	 Задача выбора структуры нейронной сети.\\
+	~\\
+
+{\bf Требуется}\\
+\quad
+	Найти нейросеть оптимальной сложности.\\
+	~\\
+
+{\bf Проблемы}\\
+	\begin{itemize}
+		\item Большое количество параметров,
+		\item Высокая вычислительная сложность оптимизации,
+		\item Невозможность использования эвристических и переборных алгоритмов выбора струкутры модели
+	\end{itemize}
+
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Литература}
+
+	\begin{itemize}
+		\item \textit{LeCun Y., Denker J. , Solla S.}\\ Optimal Brain Damage~// Advances in Neural Information Processing Systems, 1989. Vol. 2. P. 598--605.
+		\item	\textit{Graves A.}\\ Practical Variational Inference for Neural Networks~// Advances in Neural Information Processing Systems, 2011. P. 2348--2356.
+	\end{itemize}
+	
+	\begin{itemize}
+		\item \textit{Bishop C.}\\ Pattern Recognition and Machine Learning. --- Berlin: Springer, 2006. 758 p.
+		\item \textit{Neychev R., Katrutsa A., Strijov V.}\\ Robust selection of multicollinear features in forecasting~// Factory Laboratory, 2016. Vol.~82. No~2. P.~68--74.		
+	\end{itemize}
+	
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Постановка задачи}
+
+\[
+\mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
+\]
+\[
+\mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}},
+\]
+ где $\mathbf{x}_i\in\mathbf{X}\subset\mathbb{R}^{\text{n}},\quad y_i\in\mathbf{Y}\subset\mathbb{R}.$\\
+~\\
+$y\in\mathbf{Y}= \{1,\dots,Z\}$, где $Z$ - количество классов.\\
+~\\
+Модель задаётся ориентированным графом $\mathbf{G=(V,E)}$\\
+~\\
+$\mathbf{g}^{i,j} $--- базовые функции ребра $(i, j) $ c весами $\boldsymbol{\gamma}^{i,j}$\\
+~\\
+Требуется построить такую модель $\mathbf{f}$ c параметрами $\mathbf{W}\in\mathbb{R}^\text{n}$:
+\[
+\mathbf{f}(\mathbf{x}, \mathbf{W})= \{ \mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\}_{i=1}^\mathbf{|V|}
+\]
+где $\mathbf{f_i(x, w_i)}$ - подмодель c параметрами $\mathbf{w}_i$ задаётся как:
+\[
+\mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\ = \sum_{j\in adj(i)} \left\langle {\boldsymbol{\gamma}^{i,j}, \mathbf{g}^{i,j}} \right\rangle \mathbf{f}_j(\mathbf{x}, \mathbf{w}_j)\
+\].
+
+
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Постановка задачи}
+
+{\bfПравдоподобие выборки:}
+$$\mathcal{L}_\mathfrak{D}(\mathfrak{D}, \mathcal{A}, \textbf{w}) = \log p(\mathfrak{D}|\mathcal{A}, \textbf{w}),$$
+$\text{где}~p(\mathfrak{D}|\mathcal{A},\textbf{w})~\text{--- апостериорная вероятность}~\mathfrak{D}~\text{при заданых}~\textbf{w}, \mathcal{A}$\\
+~\\
+~\\
+
+{\bfПравдоподобие модели:}
+$$\mathcal{L}_{\mathcal{A}}(\mathfrak{D},\mathcal{A}) =\log p(\mathfrak{D}|\mathcal{A}) = \log  \int_{{\textbf{w}\in\mathbb{W_\mathcal{J}}}}
+p(\mathfrak{D} | \textbf{w}) p(\textbf{w} | \mathcal{A}) d \textbf{w},$$
+$\text{где}~p(\textbf{w}|\mathcal{A})~\text{--- априорная вероятность}~\textbf{w}~\text{в пространстве}~\mathbb{W_\mathcal{A}} $
+
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Постановка задачи}
+
+$$\mathcal{L}_{\mathcal{A}}(\mathfrak{D},\mathcal{A}) = \log p(\mathfrak{D}|\mathcal{A}) = \log  \int_{{\textbf{w}\in\mathbb{W_\mathcal{J}}}}
+p(\mathfrak{D} | \textbf{w}) p(\textbf{w} | \mathcal{A}) d \textbf{w} = $$
+
+$$ =\int_{\textbf{w}\in\mathbb{W_\mathcal{J}}} q(\textbf{w}) \log \frac{p(\mathfrak{D}, \textbf{w}|\mathcal{A})}{q(\textbf{w})}d \textbf{w} - \int_{\textbf{w}\in\mathbb{W_\mathcal{J}}}  q(\textbf{w}) \log \frac{p(\textbf{w}|\mathfrak{D},\mathcal{A})}{q(\textbf{w})}d \textbf{w} \approx $$
+
+$$\approx \int_{\textbf{w}\in\mathbb{W_\mathcal{J}}} q(\textbf{w}) \log \frac{p(\mathfrak{D}, \textbf{w}|\mathcal{A})}{q(\textbf{w})}d \textbf{w} = $$
+
+$$= \textcolor[rgb]{1,0,0}{\int_{\textbf{w}\in\mathbb{W_\mathcal{J}}} q(\textbf{w}) \log \frac{p(\textbf{w}| \mathcal{A})}{q(\textbf{w})}d \textbf{w}} + \textcolor[rgb]{0,0,1}{\int_{\textbf{w}\in\mathbb{W_\mathcal{J}}} q(\textbf{w}) \log p(\mathfrak{D}|\mathcal{A}, \textbf{w})d \textbf{w}}=$$
+
+$$= \textcolor[rgb]{1,0,0}{\mathcal{L}_{\textbf{w}}(\mathfrak{D}, \mathcal{A}, \textbf{w})}+\textcolor[rgb]{0,0,1}{\mathcal{L}_{E}(\mathfrak{D},\mathcal{A})},$$
+$\text{где}~q(\textbf{w})$ --- распределение апроксимирующее неизвестное апостериорное распределение~$p(\textbf{w}|\mathfrak{D},\mathcal{A})$
+
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Постановка задачи}
+
+$$q(\textbf{w})\sim \mathcal{N}(\textbf{m}, \textbf{A}_\text{ps}),$$
+где~$\textbf{m}, \textbf{A}^{-1}_\text{ps}$ --- вектор средних и матрица ковариации.
+
+$$p(\textbf{w} | \mathcal{A})\sim \mathcal{N}(\boldsymbol{\mu},\textbf{A}^{-1}_{\text{pr}}),$$
+где~$\boldsymbol{\mu},\textbf{A}_{\text{pr}}$ --- вектор средних и матрица ковариации.\\
+~\\
+
+{\bfЗадача оптимизации:}
+
+$$\hat{\textbf{w}} = \argmin_{\textbf{w} \in \mathbb{W_\mathcal{A}}, \textbf{A}_\text{ps}, \textbf{A}_\text{pr}} -\mathcal{L}_\mathcal{A}(\mathfrak{D}, \mathcal{A}, \textbf{w}) = $$
+$$=\argmin_{\textbf{w} \in \mathbb{W_\mathcal{A} }, \textbf{A}_\text{ps}, \textbf{A}_\text{pr}} \textcolor[rgb]{1,0,0}{D_{KL}\bigl(q(\textbf{w})||p(\textbf{w}|\mathcal{A})\bigr)} - \textcolor[rgb]{0,0,1}{\mathcal{L}_\mathfrak{D}(\mathfrak{D}, \mathcal{A}, \textbf{w})}$$
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Некоторые методы прореживания нейросетей}
+
+{\bfСлучайное удаление параметров:}\\
+\quad
+		$\xi \sim \mathcal{U}(\mathcal{A})$ --- индекс наименее релевантного параметра.\\
+~\\
+~\\
+{\bfОптимальное прореживание:}\\
+\quad
+	$\delta \mathcal{L} = \sum_{j\in \mathcal{A}} g_j\delta w_j + \frac{1}{2}\sum_{i,j\in \mathcal{A}} h_{ij}\delta w_i\delta w_j + O(||\delta\textbf{w}||^3)$\\
+		~\\
+
+\quad
+	Релеватность параметров определяется как рост ошибки вызванной удалением $w_j$:\\
+		~\\
+\quad
+	$\xi = \argmin\limits_{j\in \mathcal{A}}  h_{jj}\frac{w_j^2}{2}$ --- индекс наименее релевантного параметра.\\
+	~\\
+	
+{\bfВариационная оценка:}\\
+\quad
+	$\xi = \argmax\limits_{j\in \mathcal{A}}\frac{p_j(\textbf{w}|\mathcal{A})(0)}{p_j(\textbf{w}|\mathcal{A})(\mu_j)}$ --- индекс наименее релевантного параметра.
+	
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Метод Белсли}
+Рассмотрим:\\
+$$\hat{\textbf{w}} = \argmin\limits_{\mathcal{A}\subset\mathcal{J},~\textbf{w} \in \mathbb{W_\mathcal{A}}} -\mathcal{L}_\mathfrak{D}(\mathfrak{D}, \mathcal{A}, \textbf{w})$$
+
+Пусть:\\
+$\quad\textbf{A}_\text{ps}$ --- матрица ковариационная матрица вектора $\hat{\textbf{w}}$\\
+
+$$\textbf{A}_\text{ps} = \textbf{U}{\bf\Lambda}\textbf{V}^\mathsf{T} \Rightarrow \eta_j = \frac{\text{max}({\bf\Lambda})}{\lambda_j}$$
+
+$$\xi = \argmax\limits_{j\in \mathcal{A}}\eta_j \quad\quad\quad q_{ij} = \frac{u^2_{ij}/\lambda_{jj}}{\sum^n_{j=1}{u^2_{ij}/\lambda_{jj}}}$$
+
+$\quad q_{\xi j}$ --- максимальные значения отвечают наиболее зависимым параметрам
+	
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Илюстрация метода Белсли}
+
+\begin{columns}
+\begin{column}{0.65\textwidth}
+
+{
+\fontsize{8}{10} 
+\begin{center}
+$\hat{\textbf{w}} = \begin{bmatrix}
+\text{sin}(x)\\
+\text{cos}(x)\\
+\text{2+cos}(x)\\
+\text{2+sin}(x)\\
+\text{cos}(x) + \text{sin}(x)\\
+x
+\end{bmatrix},~x \in [0.0, 0.02, ..., 20.0]$
+\end{center}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+$\eta_0$ & $\eta_1$ & $\eta_2$ & $\eta_3$ & $\eta_4$ & $\eta_5$\\
+\hline
+$1.0$ & $1.5$ & $3.3$ & $2\cdot 10^{15}$ & $8\cdot 10^{15}$ & $1\cdot 10^{16}$\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+}
+
+\end{column}
+\begin{column}{0.5\textwidth}
+
+
+
+\end{column}
+\end{columns}
+
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Экспериментальные данные}
+
+{
+\fontsize{8}{10}
+\begin{table}[h]
+\begin{center}
+\caption{$\text{Описание выборок}$}
+\begin{tabular}{|c|c|c|c|}
+\hline
+	$\text{Выборка}$ & $\text{Тип задачи}$ & $\text{Размер выборки}$ & $\text{Число признаков}$\\
+	\hline
+	
+	\multicolumn{1}{|l|}{$\text{Wine}$}
+	&
+	\multicolumn{1}{|l|}{$\text{класификация}$}
+	 & $178$ & $13$\\
+	\hline
+	
+	\multicolumn{1}{|l|}{$\text{Boston Housing}$}
+	&
+	\multicolumn{1}{|l|}{$\text{регресия}$}
+	& $506$ & $13$\\
+	\hline
+	\multicolumn{1}{|l|}{$\text{Synthetic data}$}
+	&
+	\multicolumn{1}{|l|}{$\text{регресия}$}
+	& $10000$ & $100$\\
+\hline
+
+\end{tabular}
+\end{center}
+\end{table}
+}
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Синтетические данные}
+
+
+{\bfЭтап первый:}
+$$\mathbf{w}_{\text{synthetic}}  \sim \mathcal{N}(\textbf{m}_{\text{synthetic}}, \textbf{A}_{\text{synthetic}})$$
+$$\textbf{m}_{\text{synthetic}} = \begin{bmatrix}
+1.0\\
+0.0025\\
+\cdots\\
+0.0025
+\end{bmatrix}
+\quad
+\textbf{A}_{\text{synthetic}} = \begin{bmatrix}
+1.0& 10^{-3}& \cdots& 10^{-3}& 10^{-3}\\
+10^{-3}& 1.0& \cdots& 0.95& 0.95\\
+\cdots&\cdots&\cdots&\cdots&\cdots\\
+10^{-3}& 0.95& \cdots& 0.95& 1.0
+\end{bmatrix}$$\\
+~\\
+~\\
+{\bfЭтап второй:}
+$$\mathfrak{D}_{\text{synthetic}} = \{(\textbf{x}_i,y_i)| \textbf{x}_i \sim  \mathcal{N}(\textbf{1}, \textbf{I}),~y_i~=~x_{i0},~i~=~1 ... 10000\}$$
+
+\end{frame}
+
+%----------------------------------------------------------------------------------------------------------
+
+\begin{frame}{Вывод}
+
+\begin{itemize}
+	\item Исследовались методы прореживания нейросетей,
+	\item Был предложен алгоритм прореживания параметров модели на основе метода Белсли.
+\end{itemize}
+
+{\bf Нерешенные проблемы}\\
+	\begin{itemize}
+		\item Вычислительная сложность оптимизации,
+		\item Невозможность получения адекватной статистической оценки параметров.
+	\end{itemize}
+
+\end{frame}
+%----------------------------------------------------------------------------------------------------------
+
+
+
+
+\end{document} 
