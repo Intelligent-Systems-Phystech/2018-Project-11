@@ -3,6 +3,9 @@
 \usepackage[english,russian]{babel}
 \usepackage{amsmath,mathrsfs,mathtext}
 \usepackage{graphicx, epsfig}
+\usepackage{graphicx}
+\graphicspath{ {pic/} }
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \usepackage{caption}
 \usepackage{subfig}
 \usepackage{amsmath}
@@ -70,7 +73,7 @@
 	
 	\begin{itemize}
 		\item \textit{Tommi S. Jaakkol Harald Steck} On the dirichlet prior and bayesian regularization.
-		\item \textit{LeCun Y., Denker J. , Solla S.}\\ Optimal Brain Damage~// Advances in Neural Information Processing Systems, 1989. Vol. 2. P. 598--605.	
+% 		\item \textit{LeCun Y., Denker J. , Solla S.}\\ Optimal Brain Damage~// Advances in Neural Information Processing Systems, 1989. Vol. 2. P. 598--605.	
 	\end{itemize}
 	
 \end{frame}
@@ -157,7 +160,109 @@ $$Accuracy = \frac{1}{m^\text{valid}}\sum_{\mathbf{x}, y \in \mathfrak{D}^\text{
 \end{frame}
 
 %----------------------------------------------------------------------------------------------------------
+% \begin{frame}{Устойчивость модели к шуму в параметрах модели}
 
+% \centering
+% \includegraphics[width=1\linewidth]{slides_ce_noise_params_graph.pdf}
+% \caption{}
+% \label{}
+
+% \end{frame}
+
+% \begin{frame}{Устойчивость модели к шуму в параметрах модели}
+
+% \centering
+% \includegraphics[width=1\linewidth]{slides_t1_noise_params_graph.pdf}
+% \caption{}
+% \label{}
+
+% \end{frame}
+
+% \begin{frame}{Устойчивость модели к шуму в параметрах модели}
+
+% \centering
+% \includegraphics[width=1\linewidth]{slides_t5_noise_params_graph.pdf}
+% \caption{}
+% \label{}
+
+% \end{frame}
+
+% \begin{frame}{Устойчивость модели к шуму в данных}
+
+% \centering
+% \includegraphics[width=1\linewidth]{slides_ce_noise_graph.pdf}
+% \caption{}
+% \label{}
+
+% \end{frame}
+
+\begin{frame}{Устойчивость модели к шуму в данных}
+
+\centering
+\includegraphics[width=1\linewidth]{slides_t1_noise_graph.pdf}
+\caption{}
+\label{}
+
+\end{frame}
+
+\begin{frame}{Устойчивость модели к шуму в данных}
+
+\centering
+\includegraphics[width=1\linewidth]{slides_t5_noise_graph.pdf}
+\caption{}
+\label{}
+
+\end{frame}
+
+%!!!!!!!!!!!!!!!!!!!!!!!!1
+\begin{frame}{Динамика изменения структурных параметров в процессе обучения}
+
+\begin{minipage}[h]{0.31\linewidth}
+\center{\includegraphics[width=1\linewidth]{alphas_weak.jpeg} \\ слабая \n регуляризация}
+\end{minipage}
+\begin{minipage}[h]{0.31\linewidth}
+\center{\includegraphics[width=1\linewidth]{alphas_strong.jpeg} \\ сильная регуляризация}
+\end{minipage}
+\begin{minipage}[h]{0.31\linewidth}
+\center{\includegraphics[width=1\linewidth]{alphas_variable.jpeg} \\ вариационная регуляризация}
+\end{minipage}
+% {\includegraphics[width=0.5\textwidth]{alphas_weak.jpeg}}
+% \subfloat[2 режим] {\includegraphics[width=0.5\textwidth]{alphas_variable.jpeg}}\\
+% \subfloat[3 режим] {\includegraphics[width=0.5\textwidth]{alphas_strong.jpeg}}
+\caption{}
+\label{}
+
+\end{frame}
+
+% \begin{frame}{Динамика изменения структурных параметров в процессе обучения для слабой регуляризации}
+
+% \centering
+% \includegraphics[width=0.6\linewidth, hight=1\textwidth    ]{alphas_weak.jpeg}
+% \caption{}
+% \label{}
+
+
+% \end{frame}
+
+% \begin{frame}{Динамика изменения структурных параметров в процессе обучения для сильной регуляризации}
+
+% \centering
+% \includegraphics[width=0.6\linewidth]{alphas_strong.jpeg}
+% \caption{}
+% \label{}
+
+% \end{frame}
+
+% \begin{frame}{Динамика изменения структурных параметров в процессе обучения для вариационной регуляризации}
+
+% \centering
+% \includegraphics[width=0.6\linewidth]{alphas_variable.jpeg}
+% \caption{}
+% \label{}
+
+% \end{frame}
+
+%-------------------------------------------------------------------------------------------------------------
 \begin{frame}{Вывод}
 
 \begin{itemize}
@@ -177,4 +282,4 @@ $$Accuracy = \frac{1}{m^\text{valid}}\sum_{\mathbf{x}, y \in \mathfrak{D}^\text{
 
 
 
-\end{document} 
+\end{document}

@@ -1,86 +1,68 @@
-\documentclass[10pt]{beamer}
-\usepackage[utf8]{inputenc}
-\usepackage[english,russian]{babel}
-\usepackage{amsmath,mathrsfs,mathtext}
-\usepackage{graphicx, epsfig}
+\documentclass[12pt,twoside]{article}
+\usepackage{jmlda}
+
 \usepackage{graphicx}
 \graphicspath{ {pic/} }
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
-\usepackage{caption}
-\usepackage{subfig}
-\usepackage{amsmath}
+\usepackage{wrapfig}
 
-\usepackage{multicol}
+%\NOREVIEWERNOTES
+\title
+    [Автоматическое построение нейросети оптимальной сложности ] % Краткое название; не нужно, если полное название влезает в~колонтитул
+    {Автоматическое построение нейросети оптимальной сложности. }
+\author
+    {
+    	Маркин~В.\,О.$^1$, 
+    	Забазнов~А.\,Г.$^1$, 
+    	Горян~Н.\,А.$^1$, 
+    	Губанов~С.\,Е.$^1$, 
+    	Таранов~С.\,К.$^1$,
+    	Криницкий~К.\,Д.$^1$, 
+    	Товкес~А.\,A.$^1$,
+	    Улитин~А.\,Ю.$^1$
+	} % основной список авторов, выводимый в оглавление
+\email
+    {
+    	markin1198@mail.ru; 
+    	antoniozabaznov@yandex.ru; goryan.na@phystech.edu; sergey.gubanov@phystech.edu; taranov.sk@phystech.edu; 
+    	krinitskiy.kd@phystech.edu;
+    	tovkes.aa@phystech.edu;
+    	ulitin.ayu@phystech.edu
+    	}
+\organization
+    {Московский физико-технический институт$^1$}
 
-\usepackage{tikz}
+\abstract
+{В работе рассматривается задача построения оптимальной структуры нейронной сети и исследуется вопрос устойчивости построенной модели. Для оптимизации структурных параметров используется  переход от выбора конкретной архитектуры к выбору комбинации различных архитектур сети и вариационный подход. Также исследуется влияние изменения данных на структуру сети. Для оценки качества и устойчивости моделей, построенных при помощи данного метода, проводятся эксперименты на выборке CIFAR10. Проводится сравнение предложенного алгоритма с другими методами поиска оптимальных моделей нейронной сети.
 
-\DeclareMathOperator*{\argmin}{arg\,min}
-\DeclareMathOperator*{\argmax}{arg\,max}
+    	
 
-\makeatletter
-\let\@@magyar@captionfix\relax
-\makeatother
+\bigskip
 
-\fontsize{10}{15}
+\textbf{Ключевые слова}:  \emph{нейронные сети, автоматическое построение нейронных сетей, оптимальная структура нейронной сети}
+}
 
-\usetheme{Warsaw}
-\usecolortheme{sidebartab}
-\definecolor{beamer@blendedblue}{RGB}{31,96,49}
-
-%----------------------------------------------------------------------------------------------------------
-\title[\hbox to 56mm{Нейросети оптимальной сложности  \hfill\insertframenumber\,/\,\inserttotalframenumber}]
-{Автоматическое построение нейросети оптимальной сложности }
-\author[В.\,О. Маркин, А.\,Г. Забазнов, Н.\,А. Горян, С.\,Е. Губанов, С.\,К. Таранов]{\large \\Маркин Валерий, Забазнов Антон, Горян Николай, Сергей Губанов, Сергей Таранов, Товкес Артём, Улитин Александр, Криницкий Константин}
-\institute{\large
-Московский физико-технический институт}
-
-\date{\footnotesize{10 декабря, 2018г.}}
-%----------------------------------------------------------------------------------------------------------
 \begin{document}
-%----------------------------------------------------------------------------------------------------------
-\begin{frame}
-\titlepage
-\end{frame}
-%-----------------------------------------------------------------------------------------------------
-\begin{frame}{Цель работы}
 
-{\bf Иследуется}\\
-\quad
-	 Задача выбора структуры нейронной сети.\\
-	~\\
 
-{\bf Требуется}\\
-\quad
-	Найти нейросеть оптимальной сложности.\\
-	~\\
+\maketitle
 
-{\bf Проблемы}\\
-	\begin{itemize}
-		\item Большое количество параметров,
-		\item Высокая вычислительная сложность оптимизации,
-		\item Невозможность использования эвристических и переборных алгоритмов выбора струкутры модели
-	\end{itemize}
 
-\end{frame}
-%----------------------------------------------------------------------------------------------------------
+\section{Введение}
+При использовании нейросетевых моделей в анализе данных часто встает вопрос о выборе архитектуры модели. Нейронная сеть имеет большое число гиперпараметров. Например, нейронная сеть, построенная по восьмислойной архитектуре AlexNet, имеет около 60 миллионов параметров. Долгое время для поиска оптимальной структуры нейросети и настройки её параметров использовались перебор и различные эвристические соображения~\cite{DBLP:conf/emnlp/Kim14}. Такие подходы вычислительно неэффективны и не дают гарантий оптимальности полученной модели.
 
-\begin{frame}{Литература}
+Под оптимальной моделью понимается структура обучаемой сети и совокупность её гиперпараметров, которая даёт приемлемое качество классификации или регрессии. В данной работе в качестве критерия выбора модели предлагается сложность модели, то есть величина, учитывающая сложность описания совокупности выборки и модели. Под описанием выборки понимается приближенная оценка сложности модели, основанная на связи с её правдоподобием\cite{DescriptionLength}
 
-	\begin{itemize}
-		\item \textit{Yang .Y Hanxiao L., Simonyan K.}\\ Darts: Differentiable architecture search. 2018.
-		\item	\textit{Dougal Maclaurin, David Duvenaud, Ryan P. Adams}Gradient-based hyperparameter optimization through reversible learning. In Francis Bach and David Blei, editors, Proceedings of the 32nd International Conference on Machine Learning, volume 37 of Proceedings of Machine Learning Research, pages 2113–2122, Lille, France, 07–09 Jul 2015. PMLR.
-	\end{itemize}
-	
-	\begin{itemize}
-		\item \textit{Tommi S. Jaakkol Harald Steck} On the dirichlet prior and bayesian regularization.
-% 		\item \textit{LeCun Y., Denker J. , Solla S.}\\ Optimal Brain Damage~// Advances in Neural Information Processing Systems, 1989. Vol. 2. P. 598--605.	
-	\end{itemize}
-	
-\end{frame}
-%----------------------------------------------------------------------------------------------------------
+Существует несколько подходов выбора модели оптимальной сложности. В работе~\cite{Cun:1990:OBD:109230.109298} представлен метод выбора модели с использованием прореживания нейронной сети, который заключается в обучении максимально большой сети, при последующем удалении части связей. Другой подход заключается в предсказании структуры модели другой нейросетью~\cite{Sutskever:2014:SSL:2969033.2969173}.
 
-\begin{frame}{Постановка задачи}
-Рассматриваем задачу классификации.\\
+В данной работе для выбора оптимального набора гиперпараметров проводится процедура релаксации~\cite{Liu2018DARTSDA} --- переход от дискретного множества возможных значений гиперпараметров к непрерывному множетсву их комбинаций. Эта процедура позволяет параметризовать структуру модели некотором действительным вектором.
+Такой подход дает возможность применять методы непрерывной оптимизации для нахождения наилучшего набора гиперпараметров. В основе разработанного метода лежит алгоритм DARTS, предложенный в работе\cite{DARTS}.
+Оптимизация гиперпараметров проводится градиентными методами \cite{pmlr-v37-maclaurin15, pmlr-v70-franceschi17a, Pedregosa} либо с использованием Гауссовских процессов и Байесовской оптимизации.
+
+Проверка и анализ метода проводится на выборке CIFAR-10\cite{CIFAR-10}. В ходе экспериментов оценивается не только качество, которое дает полученная модель но и её вычислительная сложность и устойчивость. Проводится сравнение представленного метода с эвристическими алгоритмами выбора модели, а также с алгоритмом DARTS.
+
+\section{Постановка задачи}
+
 Пусть заданы обучающая и вылидационная выборки:
 \[
 \mathfrak{D}^{\text{train}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{train}},
@@ -88,29 +70,27 @@
 \[
 \mathfrak{D}^{\text{valid}} = \{\mathbf{x}_i, y_i\}, \quad i=1,\dots,m^{\text{valid}},
 \]
- где $\mathbf{x}_i\in\mathbf{X}\subset\mathbb{R}^{\text{n}},\quad y_i\in\mathbf{Y}\subset\mathbb{R}.$\\
-~\\
-$y\in\mathbf{Y}= \{1,\dots,Z\}$, где $Z$ - количество классов.\\
-~\\
-Модель задаётся ориентированным графом $\mathbf{G=(V,E)}$\\
-~\\
-$\mathbf{g}^{i,j} $--- базовые функции ребра $(i, j) $ c весами $\boldsymbol{\gamma}^{i,j}$\\
-~\\
-Требуется построить такую модель $\mathbf{f}$ c параметрами $\mathbf{W}\in\mathbb{R}^\text{n}$:
+
+состоящие из множеств пар объект-метка,
+\[
+\mathbf{x}_i\in\mathbf{X}\subset\mathbb{R}^{\text{n}},\quad y_i\in\mathbf{Y}\subset\mathbb{R}.
+\] 
+
+Метка $y$ объекта $\mathbf{x}$ принадлежит множеству $y\in\mathbf{Y}= \{1,\dots,Z\}$, где $Z$ - количество классов.
+\\
+
+Модель задаётся ориентированным графом $\mathbf{G=(V,E)}$, где для каждого ребра $(i,j)$ заданы базовые функции $\mathbf{g}^{i,j}, |\mathbf{g}^{i,j}| = K^{i,j}$ и их веса $\boldsymbol{\gamma}^{i,j}$. Требуется построить такую модель $\mathbf{f}$ c параметрами $\mathbf{W}\in\mathbb{R}^\text{n}$:
 \[
 \mathbf{f}(\mathbf{x}, \mathbf{W})= \{ \mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\}_{i=1}^\mathbf{|V|}
 \]
+
 где $\mathbf{f_i(x, w_i)}$ - подмодель c параметрами $\mathbf{w}_i$ задаётся как:
 \[
 \mathbf{f}_i(\mathbf{x}, \mathbf{w}_i)\ = \sum_{j\in adj(i)} \left\langle {\boldsymbol{\gamma}^{i,j}, \mathbf{g}^{i,j}} \right\rangle \mathbf{f}_j(\mathbf{x}, \mathbf{w}_j)\
 \].
 
-
-\end{frame}
-
-%----------------------------------------------------------------------------------------------------------
-
-\begin{frame}{Постановка задачи}
+Тогда параметры модели определяются как конкатенация всех параметров каждой подмодели: $\mathbf{W}=[\mathbf{w}_1,\dots,\mathbf{w}_\mathbf{|V|}]$, а структура модели $\boldsymbol{\Gamma}$ задаётся вектором $\{ \boldsymbol{\gamma}^{i,j}\}_\mathbf{E}$.
+\\
 
 Функция потерь на обучении $L$ и функция потерь на валидации $Q$ задаются как:
 \[
@@ -119,9 +99,24 @@ L (\mathbf{W}, \mathbf{A}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{train}|
 \[
 Q (\mathbf{W}, \boldsymbol{\Gamma})= \log p(\mathbf{Y}^\text{valid}|\mathbf{X}^\text{valid}, \mathbf{W}, \boldsymbol{\Gamma}) + \lambda p(\boldsymbol{\Gamma}),
 \]
-где $\mathbf{A}$ и $\lambda$ --- регуляризационные слагаемые, $p(\boldsymbol{\Gamma})$ - произведение всех произведение вероятностей всех $\boldsymbol{\gamma}^{i,j} \in \boldsymbol{\Gamma}$. \\
-~\\
-Требуется построить модель классификации $\mathbf{f}$ с параметрами $\mathbf{W}$, доставляющую минимум функции потерь на валидации $Q$.
+где $\mathbf{A}$ и $\lambda$ --- регуляризационные слагаемые, $p(\boldsymbol{\Gamma})$ - произведение всех произведение вероятностей всех $\boldsymbol{\gamma}^{i,j} \in \boldsymbol{\Gamma}$. Перед подсчётом значения  функции потерь на валидации делается априорное предположение  о распределении j том, что вектор
+$\boldsymbol{\Gamma} = \{ \boldsymbol{\gamma}^{i,j}\}$ имеет распределение Дирихле\cite{Dirichlet}.
+\\
+
+Вектор $\{{\gamma}^{i,j}\}$ имеет распределение Дирихле с параметром $\alpha$, если:
+
+\[
+f(\gamma) = f(\gamma_1, \dots,\gamma_K) = 
+\begin{cases}
+\frac{\boldsymbol{F} (K\times\alpha)}{{\boldsymbol{F}(\alpha)}^{K}}\prod\limits_{i = 1}^K\gamma_i,\gamma \in \boldsymbol{S}
+\\
+0, \gamma\notin \boldsymbol{S}
+\end{cases}
+\]
+где $\boldsymbol{F}$ - гамма-функция, $\boldsymbol{S}$ - симплекс: $\{\gamma \in \mathbb{R}^K: \sum_{i=1}^K \gamma_i = 1, \gamma_i \geqslant 0\}$.
+\\
+
+Требуется решить задачу двухуровневой оптимизации, оптимизируя параметры модели по обучающей выборке, а структуру модели по валидационной: 
 \[
 \mathbf{W}^*( \boldsymbol{\Gamma}) = \argmin_{\mathbf{W}}
 L (\mathbf{W}, \boldsymbol{\Gamma})\]
@@ -131,11 +126,7 @@ L (\mathbf{W}, \boldsymbol{\Gamma})\]
 \]
 
 
-
-\end{frame}
-
-%----------------------------------------------------------------------------------------------------------
-\begin{frame}{Идея для базовых алгоритмов}
+\section{Релаксация}
 Известно множество всех возможных операций $\mathbf{g}^{i,j} \in \mathbf{G}$. Для перехода к непрерывному пространству таких функций проводится релаксация каждой операции c использованием softmax:
 
 
@@ -144,142 +135,70 @@ $$\overline{\mathbf{g}}^{(i, j)}(x) = \sum\limits_{\mathbf{g} \in \mathbb{K}}{\f
 
 где $\gamma^{i, j}$ --- вектор, параметризующий комбинацию базовых функций. Таким образом, путём подбора  непрерывных параметров  $\gamma$ осуществляется переход к задаче поиска базовой функции. В конце поиска, каждая комбинация базовых функций $\overline{\mathbf{g}}^{(i, j)}(x) $  меняется на $\mathbf{g}^{(i, j)} = \argmax\limits_{\mathbf{g} \in \mathbb{K}}\gamma_{\mathbf{g}}^{(i, j)}$.\\
 
+\section{Эксперимент}
 
-\end{frame}
+Для проверки влияния регуляризации структуры на итоговую модель был проведен вычислительный эксперимент. В качестве выборки использовалась выборка изображений CIFAR-10~\cite{CIFAR-10}. Рассматривалась задача классификации. Основным критерием качества выступал 
 
-%----------------------------------------------------------------------------------------------------------
-\begin{frame}{Описание эксперимента}
-В качестве выборки использовалась выборка изображений CIFAR-10. Основным критерием качества выступал 
 $$Accuracy = \frac{1}{m^\text{valid}}\sum_{\mathbf{x}, y \in \mathfrak{D}^\text{valid}} I(\mathbf{f}(\mathbf{x}), y)$$
-В качестве регуляризации использовались:\\
-\begin{enumerate}
-    \item Слабая регуляризация(Дирихле с параметром $\alpha = 1$).\\
-    \item Меняющейся регуляризация(Дирихле с параметром $\alpha$, меняющимся на каждой эпохи в интервале $(10^{-30}; 1)$).\\
-    \item Сильной регуляризацией(распределение Дирихле с параметром  $\alpha= 10^{-30}$).\\
-\end{enumerate}
-\end{frame}
+ 
+ Эксперимент проводился в следующих режимах:\\
+ 
+1) Алгоритм выбора структуры со слабой регуляризацией.\\
+ В качестве регуляризации структуры выступало распределение Дирихле с параметром $\alpha = 1$.\\
 
-%----------------------------------------------------------------------------------------------------------
-% \begin{frame}{Устойчивость модели к шуму в параметрах модели}
+2) Алгоритм выбора структуры с меняющейся регуляризацией.\\
+В качестве регуляризации структуры выступало распределение Дирихле с параметром $\alpha$, меняющимся на каждой эпохи в интервале $(10^{-30}; 1)$.\\
 
-% \centering
-% \includegraphics[width=1\linewidth]{slides_ce_noise_params_graph.pdf}
-% \caption{}
-% \label{}
+3) Алгоритм выбора структуры с сильной регуляризацией. \\
+В качестве регуляризации структуры выступало распределение Дирихле с параметром  $\alpha= 10^{-30}$.\\
+ 
+На рис.~1 изображена общая динамика изменения структурных параметров в процессе обучения.
+\begin{figure}[!htbp]
+	\centering
+	\subfloat[1 режим] {\includegraphics[width=0.5\textwidth]{pic/alphas_weak.jpeg}}
+	\subfloat[2 режим] {\includegraphics[width=0.5\textwidth]{pic/alphas_variable.jpeg}}\\
+	\subfloat[3 режим] {\includegraphics[width=0.5\textwidth]{pic/alphas_strong.jpeg}}
+	\caption{}
+	\label{}
+\end{figure}
 
-% \end{frame}
+На рис.~2 для 3 запусков в каждом режиме соответствие между top-1 accuracy на тестовых данных и количеством параметров в сети, больших порога 0.1.
 
-% \begin{frame}{Устойчивость модели к шуму в параметрах модели}
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.5\textwidth]{pic/accuracy.jpeg}
+	\caption{}
+	\label{}
+\end{figure}
 
-% \centering
-% \includegraphics[width=1\linewidth]{slides_t1_noise_params_graph.pdf}
-% \caption{}
-% \label{}
+На рис.~3 показана таблица с усредненным по 3 запускам в каждом режиме top-1 и top-5 accuracy.
 
-% \end{frame}
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.5\textwidth]{pic/accuracy_table.jpeg}
+	\caption{}
+	\label{}
+\end{figure}
 
-% \begin{frame}{Устойчивость модели к шуму в параметрах модели}
+Рисунок ~4 отражает поведение в сети в зависимости от присутствия в данных случайного шума, используется нормальное распределение с нулевым математическим ожиданием.
+График показывает что сильная и меняющаяся регуляризации оказываются более сустойчивыми к зашумлению данных
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[width=1\linewidth]{pic/noise1_graph.pdf}
+	\caption{}
+	\label{}
+\end{figure}
 
-% \centering
-% \includegraphics[width=1\linewidth]{slides_t5_noise_params_graph.pdf}
-% \caption{}
-% \label{}
-
-% \end{frame}
-
-% \begin{frame}{Устойчивость модели к шуму в данных}
-
-% \centering
-% \includegraphics[width=1\linewidth]{slides_ce_noise_graph.pdf}
-% \caption{}
-% \label{}
-
-% \end{frame}
-
-\begin{frame}{Устойчивость модели к шуму в данных}
-
-\centering
-\includegraphics[width=1\linewidth]{slides_t1_noise_graph.pdf}
-\caption{}
-\label{}
-
-\end{frame}
-
-\begin{frame}{Устойчивость модели к шуму в данных}
-
-\centering
-\includegraphics[width=1\linewidth]{slides_t5_noise_graph.pdf}
-\caption{}
-\label{}
-
-\end{frame}
-
-%!!!!!!!!!!!!!!!!!!!!!!!!1
-\begin{frame}{Динамика изменения структурных параметров в процессе обучения}
-
-\begin{minipage}[h]{0.31\linewidth}
-\center{\includegraphics[width=1\linewidth]{alphas_weak.jpeg} \\ слабая \n регуляризация}
-\end{minipage}
-\begin{minipage}[h]{0.31\linewidth}
-\center{\includegraphics[width=1\linewidth]{alphas_strong.jpeg} \\ сильная регуляризация}
-\end{minipage}
-\begin{minipage}[h]{0.31\linewidth}
-\center{\includegraphics[width=1\linewidth]{alphas_variable.jpeg} \\ вариационная регуляризация}
-\end{minipage}
-% {\includegraphics[width=0.5\textwidth]{alphas_weak.jpeg}}
-% \subfloat[2 режим] {\includegraphics[width=0.5\textwidth]{alphas_variable.jpeg}}\\
-% \subfloat[3 режим] {\includegraphics[width=0.5\textwidth]{alphas_strong.jpeg}}
-\caption{}
-\label{}
-
-\end{frame}
-
-% \begin{frame}{Динамика изменения структурных параметров в процессе обучения для слабой регуляризации}
-
-% \centering
-% \includegraphics[width=0.6\linewidth, hight=1\textwidth    ]{alphas_weak.jpeg}
-% \caption{}
-% \label{}
+На рис.~5 также изображено поведение модели в условиях наложение случайного шума на параметры модели.
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\linewidth]{pic/noise_params_graph.pdf}
+	\caption{}
+	\label{}
+\end{figure}
 
 
-% \end{frame}
-
-% \begin{frame}{Динамика изменения структурных параметров в процессе обучения для сильной регуляризации}
-
-% \centering
-% \includegraphics[width=0.6\linewidth]{alphas_strong.jpeg}
-% \caption{}
-% \label{}
-
-% \end{frame}
-
-% \begin{frame}{Динамика изменения структурных параметров в процессе обучения для вариационной регуляризации}
-
-% \centering
-% \includegraphics[width=0.6\linewidth]{alphas_variable.jpeg}
-% \caption{}
-% \label{}
-
-% \end{frame}
-
-%-------------------------------------------------------------------------------------------------------------
-\begin{frame}{Вывод}
-
-\begin{itemize}
-	\item Проведен эксперимент по регялиразции структуры нейронной сети на выборке CIFAR-10
-	\item Эксперименты показали, что структура нейронной сети вырождается в дискретную при использовании регуляризации
-	\item Эксперимент показал, что оптимизация подвержена застреванию в стационарных точках пространства структурных параметров
-\end{itemize}
-
-{\bf Планируется}\\
-	\begin{itemize}
-		\item Предложить метод регуляризации, позволяющий избегать застревания в стационарных точках
-	\end{itemize}
-
-\end{frame}
-%----------------------------------------------------------------------------------------------------------
-
-
-
+\bibliography{report.bib}
+\bibliographystyle{unsrt}
 
 \end{document}
